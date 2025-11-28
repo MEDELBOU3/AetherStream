@@ -8,9 +8,10 @@
     "start": "electron .",
     "dev": "electron-reloader . & electron .",
     "build": "electron-builder",
-    "build:win": "electron-builder --win",
+    "build:win": "electron-builder --win -p always",
     "build:mac": "electron-builder --mac",
-    "build:linux": "electron-builder --linux"
+    "build:linux": "electron-builder --linux",
+    "build:all": "electron-builder -mwl"
   },
   "build": {
     "appId": "com.aetherstream.app",
@@ -21,6 +22,7 @@
       "index.html",
       "css/",
       "js/",
+      "assets/",
       "node_modules/"
     ],
     "directories": {
@@ -28,9 +30,20 @@
     },
     "win": {
       "target": [
-        "nsis",
-        "portable"
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
+      "icon": "assets/icon.ico",
       "certificateFile": null,
       "certificatePassword": null
     },
@@ -38,12 +51,28 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
+      "createStartMenuShortcut": true,
+      "shortcutName": "AetherStream"
+    },
+    "mac": {
+      "icon": "assets/icon.icns",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "linux": {
+      "icon": "assets/icon.png",
+      "target": [
+        "AppImage",
+        "deb"
+      ]
     }
   },
   "devDependencies": {
     "electron": "latest",
     "electron-builder": "latest",
+    "electron-icon-builder": "^2.0.1",
     "electron-reloader": "latest"
   },
   "dependencies": {

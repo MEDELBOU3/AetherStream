@@ -28,10 +28,8 @@ function createWindow() {
   
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
 
-  // Open DevTools in development
-  if (isDev) {
-    mainWindow.webContents.openDevTools();
-  }
+  // DevTools hidden by default (development only)
+  // Uncomment to enable: mainWindow.webContents.openDevTools();
 
   mainWindow.on('closed', () => {
     mainWindow = null;
@@ -53,7 +51,7 @@ app.on('activate', () => {
   }
 });
 
-// Create application menu
+// Create application menu (minimal, no DevTools)
 const createMenu = () => {
   const template = [
     {
@@ -77,18 +75,6 @@ const createMenu = () => {
         { role: 'cut' },
         { role: 'copy' },
         { role: 'paste' }
-      ]
-    },
-    {
-      label: 'View',
-      submenu: [
-        { role: 'reload' },
-        { role: 'forceReload' },
-        { role: 'toggleDevTools' },
-        { type: 'separator' },
-        { role: 'resetZoom' },
-        { role: 'zoomIn' },
-        { role: 'zoomOut' }
       ]
     }
   ];
