@@ -43,7 +43,7 @@
           ]
         }
       ],
-      "icon": "assets/icon.ico",
+      "icon": "assets/aetherStream.ico",
       "certificateFile": null,
       "certificatePassword": null
     },
@@ -55,14 +55,14 @@
       "shortcutName": "AetherStream"
     },
     "mac": {
-      "icon": "assets/icon.icns",
+      "icon": "assets/aetherStream.icns",
       "target": [
         "dmg",
         "zip"
       ]
     },
     "linux": {
-      "icon": "assets/icon.png",
+      "icon": "assets/aetherStream.png",
       "target": [
         "AppImage",
         "deb"
