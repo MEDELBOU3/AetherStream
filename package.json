@@ -9,7 +9,7 @@
     "start": "electron .",
     "dev": "electron-reloader . & electron .",
     "build": "electron-builder",
-    "build:win": "electron-builder --win -p always",
+    "build:win": "electron-builder --win",
     "build:mac": "electron-builder --mac",
     "build:linux": "electron-builder --linux",
     "build:all": "electron-builder -mwl"
@@ -23,12 +23,8 @@
       "index.html",
       "css/",
       "js/",
-      "assets/",
       "node_modules/"
     ],
-    "directories": {
-      "buildResources": "assets"
-    },
     "win": {
       "target": [
         {
@@ -43,8 +39,7 @@
             "x64"
           ]
         }
-      ],
-      "icon": "assets/aetherStream.ico"
+      ]
     },
     "nsis": {
       "oneClick": false,
@@ -52,20 +47,6 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "AetherStream"
-    },
-    "mac": {
-      "icon": "assets/aetherStream.icns",
-      "target": [
-        "dmg",
-        "zip"
-      ]
-    },
-    "linux": {
-      "icon": "assets/aetherStream.png",
-      "target": [
-        "AppImage",
-        "deb"
-      ]
     }
   },
   "devDependencies": {

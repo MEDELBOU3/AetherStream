@@ -18,7 +18,7 @@ function createWindow() {
       enableRemoteModule: false,
       sandbox: true
     },
-    icon: path.join(__dirname, 'assets/aetherStream.ico')
+    icon: path.join(__dirname, 'assets/aetherStream.png')
   });
 
   // Load the app
