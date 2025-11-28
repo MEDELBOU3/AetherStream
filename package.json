@@ -2,6 +2,7 @@
   "name": "aetherstream",
   "version": "1.0.0",
   "description": "AetherStream — Ultimate Provider Edition Desktop App",
+  "author": "MEDELBOU3",
   "main": "main.js",
   "homepage": "./",
   "scripts": {
@@ -43,9 +44,7 @@
           ]
         }
       ],
-      "icon": "assets/aetherStream.ico",
-      "certificateFile": null,
-      "certificatePassword": null
+      "icon": "assets/aetherStream.ico"
     },
     "nsis": {
       "oneClick": false,
