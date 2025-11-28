@@ -1,0 +1,2381 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>AetherStream — Ultimate Provider Edition</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- GSAP Suite -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
+
+  <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body>
+
+  <div class="noise-overlay"></div>
+
+  <!-- VIDEO MODAL -->
+  <div class="video-modal" id="videoModal">
+    <!-- Clickable Backdrop -->
+    <div class="modal-bg" onclick="app.closeVideo()"></div>
+
+    <div class="video-wrapper" id="videoWrapper">
+      <!-- Header with Metadata -->
+      <div class="video-header">
+        <div class="playing-badge">
+          <span class="pulse-dot"></span> NOW PLAYING
+        </div>
+        <h2 id="videoTitleLabel">Untitled</h2>
+      </div>
+
+      <!-- Close Button (Floating) -->
+      <div class="close-video-btn magnetic" onclick="app.closeVideo()">
+        <span style="font-size:12px; font-weight:700; letter-spacing:1px;">CLOSE</span>
+        <div class="close-icon-circle"><i class="fas fa-times"></i></div>
+      </div>
+
+      <!-- Loader -->
+      <div class="video-loader" id="videoLoader">
+        <svg viewBox="0 0 50 50" class="spinner">
+          <circle cx="25" cy="25" r="20" fill="none" stroke-width="4"></circle>
+        </svg>
+      </div>
+
+      <!-- Iframe Container -->
+      <div id="videoContainer" class="video-frame-box"></div>
+    </div>
+  </div>
+
+
+  <!-- SEARCH OVERLAY -->
+  <div class="search-overlay" id="searchOverlay">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:40px;">
+      <div class="brand">SEARCH</div>
+      <div class="nav-icon" style="font-size:24px; cursor:pointer;" onclick="app.toggleSearch()">✕</div>
+    </div>
+    <div class="search-input-wrap">
+      <input type="text" class="search-input" id="searchInput" placeholder="Search Movies & TV..." autocomplete="off">
+    </div>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+
+  <!-- ADVANCED PROVIDER GRID OVERLAY -->
+  <div class="provider-overlay" id="providerOverlay">
+    <div class="provider-overlay-header">
+      <div>
+        <h2 style="font-family:'Playfair Display'; font-size:2.5rem; margin:0; line-height:1;">Global Providers</h2>
+        <p style="color:#888; margin:5px 0 0; font-size:14px;">Select a network to browse content</p>
+      </div>
+      <button class="nav-icon" style="font-size:28px;" onclick="app.toggleProviderGrid(false)">✕</button>
+    </div>
+    <div class="provider-grid-container">
+      <div class="provider-grid" id="providerGrid"></div>
+      <button class="load-more-btn" id="providerLoadMoreBtn" onclick="app.renderProviderBatch()">Load More
+        Providers</button>
+    </div>
+  </div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <div class="brand" onclick="app.go('home')">AETHER<span>.</span></div>
+
+    <div class="nav-actions">
+      <div class="nav-icon magnetic" onclick="app.toggleSearch()"><i class="fas fa-search"></i></div>
+      <div class="profile-wrapper magnetic-avatar" onclick="app.profileClick()">
+        <!-- The glowing ring behind -->
+        <div class="profile-glow"></div>
+
+        <!-- The main container -->
+        <div class="profile-inner">
+          <img src="https://mir-s3-cdn-cf.behance.net/project_modules/disp/84c20033850498.56ba69ac290ea.png" alt="User"
+            class="profile-img">
+          <!-- Status Dot -->
+          <div class="status-indicator"></div>
+        </div>
+      </div>
+      <div class="menu-trigger magnetic" id="menuToggle">
+        <span>Menu</span>
+        <div class="burger-icon">
+          <div class="burger-line"></div>
+          <div class="burger-line"></div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- SIDEBAR TRIGGER -->
+  <button class="sidebar-trigger" id="sidebarToggle">Genres</button>
+
+  <!-- FULLSCREEN MENU -->
+  <div class="fs-menu" id="fsMenu">
+    <div style="text-align:center;">
+      <a class="fs-link" onclick="app.go('home')"><span>01</span> Home</a>
+      <a class="fs-link" onclick="app.go('watchlist')"><span>02</span> Watchlist</a>
+      <a class="fs-link" onclick="app.go('originals')"><span>03</span> Originals</a>
+      <a class="fs-link" onclick="app.go('profile')"><span>04</span> Profile</a>
+      <a class="fs-link" onclick="app.go('settings')"><span>05</span> Settings</a>
+    </div>
+  </div>
+
+  <!-- GENRE SIDEBAR -->
+  <aside class="genre-sidebar" id="genreSidebar">
+    <div style="margin-bottom:30px; opacity:0.5; font-size:12px; letter-spacing:2px; text-transform:uppercase;">
+      Categories</div>
+    <div class="genre-list" id="genreList"></div>
+    <button style="position:absolute; top:30px; right:30px; font-size:24px; color:#fff;"
+      onclick="app.toggleSidebar(false)">✕</button>
+  </aside>
+
+  <!-- CLOSE BUTTON FOR SUB-VIEWS -->
+  <div class="close-view magnetic" id="closeViewBtn" onclick="app.go('home')">
+    <i class="fas fa-times"></i>
+  </div>
+
+  <!-- VIEW: HOME -->
+  <main id="view-home" class="view-container active">
+    <header class="hero">
+      <img id="heroBg" class="hero-bg" src="" alt="Hero">
+      <div class="hero-gradient"></div>
+      <div class="hero-content">
+        <div class="hero-badge">#1 Global Trending</div>
+        <h1 class="hero-title" id="heroTitle">Loading...</h1>
+        <p id="heroDesc" class="hero-desc"></p>
+        <div style="display:flex; gap:16px;">
+          <button class="btn btn-primary magnetic" id="heroPlayBtn"><i class="fas fa-play"></i> Watch Trailer</button>
+          <button class="btn btn-blur magnetic" id="heroListBtn"><i class="fas fa-plus"></i> My List</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="providers-wrap">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding:0 4px;">
+        <span
+          style="font-size:12px; letter-spacing:1px; color: var(--text-muted);; text-transform:uppercase;">Partners</span>
+        <span style="font-size:12px; cursor:pointer; color:var(--text); font-weight:600; transition:0.3s; opacity:0.8;"
+          onmouseover="this.style.opacity=1; this.style.color='var(--accent)'"
+          onmouseout="this.style.opacity=0.8; this.style.color='#fff'" onclick="app.toggleProviderGrid(true)">View All
+          Providers <i class="fas fa-arrow-right" style="font-size:10px; margin-left:4px;"></i></span>
+      </div>
+      <div class="providers-track" id="homeProviders"></div>
+    </div>
+
+    <!-- GSAP SPOTLIGHT GRID (Dynamic) -->
+    <section class="spotlight-section" id="spotlightSection">
+      <div class="spotlight-vfx-layer">
+        <div class="fog"></div>
+        <div class="light-beam"></div>
+        <div class="film-grain"></div>
+      </div>
+
+      <div class="spotlight-grid">
+        <!-- LEFT COL -->
+        <div class="spotlight-col-left">
+          <div class="spotlight-poster-area">
+            <div class="gpu poster-frame">
+              <img id="spotlightPoster" src="" alt="Poster" class="spotlight-poster">
+            </div>
+
+            <h2 class="spotlight-title" id="spotlightTitle">Loading...</h2>
+
+            <div class="spotlight-badges">
+              <span class="badge" id="spotlightYear">2024</span>
+              <span class="badge" id="spotlightRuntime">2h 10m</span>
+              <span class="badge age">R</span>
+            </div>
+
+            <div class="spotlight-score">
+              <i class="fas fa-star"></i> <span id="spotlightRating">0.0</span> <span class="source">TMDB</span>
+            </div>
+
+            <div class="spotlight-genre" id="spotlightGenres">Genre / Genre</div>
+
+            <div class="spotlight-actions-left">
+              <!-- IDs added for click handlers -->
+              <button class="btn btn-primary" id="spotlightWatchBtn">Watch Now</button>
+              <button class="btn btn-outline" id="spotlightListBtn">+ Playlist</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COL -->
+        <div class="spotlight-col-right">
+          <div class="spotlight-scene-wrap" id="spotlightSceneBtn">
+            <img id="spotlightBackdrop" src="" alt="Scene" class="scene-img">
+            <div class="play-overlay">
+              <div class="play-circle"><i class="fas fa-play"></i></div>
+            </div>
+            <div class="lens-flare"></div>
+          </div>
+
+          <div class="spotlight-details">
+            <div class="detail-block main-desc">
+              <h3>Synopsis</h3>
+              <p id="spotlightDesc">Loading...</p>
+            </div>
+
+            <div class="detail-block meta-block">
+              <div class="meta-row">
+                <span class="label">Director</span>
+                <span class="value" id="spotlightDirector">...</span>
+              </div>
+              <div class="meta-row">
+                <span class="label">Status</span>
+                <span class="value" id="spotlightStatus">Released</span>
+              </div>
+              <div class="meta-row">
+                <span class="label">Vote Count</span>
+                <span class="value" id="spotlightVotes">...</span>
+              </div>
+            </div>
+
+            <div class="spotlight-cast">
+              <h3>Top Cast</h3>
+              <div class="cast-row" id="spotlightCast"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div class="spotlight-strokes" id="spotlightStrokes">
+      <div class="stroke-layer layer-1">>>> >>>> >>>>> >>>>>>>></div>
+      <div class="stroke-layer layer-2">>> >>> >>>> >>>>></div>
+      <div class="stroke-layer layer-3">>> >> >>> >> >>></div>
+    </div>
+    <div id="homeRows" style="position:relative; z-index:5; "></div>
+  </main>
+
+  <!-- VIEW: DETAIL -->
+  <section id="view-detail" class="view-container">
+    <img id="dtBackdrop" class="detail-backdrop" src="" alt="">
+    <div class="detail-inner">
+      <div class="gpu">
+        <img id="dtPoster" class="detail-poster" src="" alt="">
+      </div>
+      <div class="detail-info">
+        <h1 id="dtTitle" class="hero-title" style="font-size:3.5rem;">Title</h1>
+        <div class="detail-meta">
+          <span id="dtYear">2023</span> • <span id="dtRating" style="color:var(--accent)">98% Match</span> • <span
+            id="dtRuntime">2h 10m</span>
+        </div>
+        <p id="dtDesc" class="detail-desc">Loading...</p>
+
+        <div style="display:flex; gap:16px; margin-bottom:50px;">
+          <button class="btn btn-primary magnetic" id="dtPlayBtn"><i class="fas fa-play"></i> Play Trailer</button>
+          <button class="btn btn-blur magnetic" id="dtListBtn"><i class="fas fa-plus"></i> Add to List</button>
+        </div>
+
+        <div id="seasonContainer" style="display:none;">
+          <h3 style="margin-bottom:20px; font-family:'Playfair Display'; font-size:1.8rem;">Seasons</h3>
+          <div class="season-list" id="dtSeasons"></div>
+          <!-- Header for Episodes -->
+          <h4 id="episodesHeader" style="margin: 30px 0 15px; font-size: 1.2rem; display:none;">Episodes</h4>
+
+          <!-- List of Episodes -->
+          <div class="episode-list" id="dtEpisodes"></div>
+        </div>
+
+        <h3 style="margin-bottom:20px; font-family:'Playfair Display'; font-size:1.8rem;">Top Cast</h3>
+        <div class="cast-list" id="dtCast"></div>
+      </div>
+    </div>
+    <div id="recContainer" style="margin-top:80px; padding:0 4%;"></div>
+  </section>
+
+  <!-- VIEW: NETWORK/GENRE -->
+  <section id="view-network" class="view-container">
+    <div class="grid-header">
+      <h1 class="grid-title" id="netTitle">Network</h1>
+      <p style="color:#aaa; margin-top:10px;">Curated Collection</p>
+    </div>
+
+    <!-- Movie Section -->
+    <div id="netMovieSection">
+      <div class="section-label">Movies</div>
+      <div class="media-grid" id="netMovieGrid"></div>
+      <button class="load-more-btn" id="loadMoreMovieBtn" onclick="app.loadMore('movie')">Load More Movies</button>
+    </div>
+
+    <!-- TV Section -->
+    <div id="netTvSection" style="margin-top:80px;">
+      <div class="section-label">TV Series</div>
+      <div class="media-grid" id="netTvGrid"></div>
+      <button class="load-more-btn" id="loadMoreTvBtn" onclick="app.loadMore('tv')">Load More TV</button>
+    </div>
+  </section>
+
+  <!-- VIEW: WATCHLIST -->
+  <section id="view-watchlist" class="view-container">
+    <div class="grid-header">
+      <h1 class="grid-title">Watchlist</h1>
+      <p style="color:#aaa; margin-top:10px;">Your personal library</p>
+    </div>
+    <div class="media-grid" id="watchlistGrid"></div>
+  </section>
+
+
+  <!-- VIEW: SETTINGS -->
+  <section id="view-settings" class="view-container">
+
+    <div class="settings-layout">
+      <!-- Sidebar -->
+      <aside class="settings-sidebar">
+        <h1 class="settings-title">Control Center</h1>
+
+        <div class="settings-nav">
+          <div class="set-tab active" onclick="app.switchSettingTab('general', this)">
+            <i class="fas fa-user-circle"></i> General
+          </div>
+          <div class="set-tab" onclick="app.switchSettingTab('playback', this)">
+            <i class="fas fa-play-circle"></i> Playback
+          </div>
+          <div class="set-tab" onclick="app.switchSettingTab('audio', this)">
+            <i class="fas fa-sliders-h"></i> Audio & Subs
+          </div>
+          <div class="set-tab" onclick="app.switchSettingTab('system', this)">
+            <i class="fas fa-microchip"></i> System
+          </div>
+        </div>
+
+        <div class="plan-card">
+          <div style="font-size:10px; opacity:0.6; text-transform:uppercase; letter-spacing:1px;">Current Plan</div>
+          <div style="font-family:'Playfair Display'; font-size:22px; color:var(--accent); margin:5px 0;">Ultimate 4K
+          </div>
+          <div style="font-size:12px; opacity:0.8;">Next billing: Oct 24</div>
+        </div>
+      </aside>
+
+      <!-- Content Area -->
+      <div class="settings-content">
+
+        <!-- TAB: GENERAL -->
+        <div id="set-general" class="set-panel active">
+          <h2 class="panel-title">Profile & Account</h2>
+
+          <div class="setting-group">
+            <div class="profile-header">
+              <!-- Avatar Image -->
+              <div class="avatar-large">
+                <!-- We added a specific ID here (optional) but the JS targets the class -->
+                <img src="https://mir-s3-cdn-cf.behance.net/project_modules/disp/84c20033850498.56ba69ac290ea.png">
+              </div>
+              <div style="flex: 1;">
+                <div class="input-label">Display Name</div>
+                <!-- ADDED ID="settingsName" -->
+                <input type="text" id="settingsName" class="cyber-input" value="Loading..." spellcheck="false">
+              </div>
+            </div>
+
+            <!-- APPEARANCE SECTION -->
+            <div class="setting-group"
+              style="border-top: 1px solid var(--border); padding-top: 30px; margin-top: 30px;">
+              <h3
+                style="font-size:14px; text-transform:uppercase; letter-spacing:1px; margin-bottom:20px; color:var(--text-muted);">
+                Appearance</h3>
+
+              <div class="control-row">
+                <div class="control-info">
+                  <div class="control-head">Dark Mode</div>
+                  <div class="control-sub" id="themeLabel">Switch between light and dark themes</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="themeToggle" onchange="app.toggleTheme()">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Avatar Selection -->
+          <div class="setting-group" style="border-top: 1px solid var(--border); padding-top: 30px; margin-top: 30px;">
+            <h3
+              style="font-size:14px; text-transform:uppercase; letter-spacing:1px; margin-bottom:20px; color:var(--text-muted);">
+              Choose Avatar
+            </h3>
+
+            <!-- Added ID 'avatarGrid' -->
+            <div class="avatar-selection-grid" id="avatarGrid">
+              <div class="avatar-item selected" onclick="app.selectAvatar(this)">
+                <img src="https://mir-s3-cdn-cf.behance.net/project_modules/disp/84c20033850498.56ba69ac290ea.png"
+                  alt="Avatar 1">
+              </div>
+              <div class="avatar-item" onclick="app.selectAvatar(this)">
+                <img src="https://i.pinimg.com/736x/ff/a6/42/ffa6421da8b8b6b345f26bc1f8a90139.jpg" alt="Avatar 2">
+              </div>
+              <div class="avatar-item" onclick="app.selectAvatar(this)">
+                <img src="https://i.pinimg.com/736x/fd/a7/9a/fda79a9471d43a39d2d8eabc8720f8aa.jpg" alt="Avatar 3">
+              </div>
+              <div class="avatar-item" onclick="app.selectAvatar(this)">
+                <img src="https://i.pinimg.com/1200x/8b/c4/ba/8bc4babefe6475305f198f37a282f810.jpg" alt="Avatar 4">
+              </div>
+              <div class="avatar-item" onclick="app.selectAvatar(this)">
+                <img src="https://i.pinimg.com/736x/13/fb/2d/13fb2d9277d1ac839cbc29271d80d43e.jpg" alt="Avatar 5">
+              </div>
+            </div>
+          </div>
+
+
+
+
+          <div class="setting-group">
+            <div class="input-label">Email Address</div>
+            <!-- ADDED ID="settingsEmail" -->
+            <input type="email" id="settingsEmail" class="cyber-input" value="..." readonly
+              style="opacity:0.5; cursor:not-allowed;">
+          </div>
+
+          <div class="setting-group" style="margin-top:40px;">
+            <!-- ADDED ONCLICK="app.signOut()" -->
+            <button class="btn btn-blur" onclick="app.signOut()"
+              style="width:100%; justify-content:center; border-color:var(--accent); color:var(--accent);">
+              Sign Out
+            </button>
+          </div>
+        </div>
+
+        <!-- TAB: PLAYBACK -->
+        <div id="set-playback" class="set-panel">
+          <h2 class="panel-title">Streaming Preferences</h2>
+
+          <div class="control-row">
+            <div class="control-info">
+              <div class="control-head">High Efficiency Streaming (HEVC)</div>
+              <div class="control-sub">Save data without losing quality</div>
+            </div>
+            <label class="toggle-switch">
+              <!-- Added ID -->
+              <input type="checkbox" id="settingHevc" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-group" style="margin-top:30px; border-top:1px solid var(--border); padding-top:20px;">
+            <h3
+              style="font-size:14px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:15px;">
+              Visual Adjustments
+            </h3>
+
+            <!-- ZOOM SLIDER -->
+            <div class="setting-group">
+              <div style="display:flex; justify-content:space-between;">
+                <div class="input-label">Cinema Zoom / Crop</div>
+                <div class="input-label" id="zoomVal">1.0x</div>
+              </div>
+              <input type="range" id="settingZoom" min="1" max="1.5" step="0.05" value="1" class="cyber-range"
+                oninput="document.getElementById('zoomVal').innerText = this.value + 'x'; player.syncSettings();">
+              <div style="font-size:11px; color:#666; margin-top:5px;">
+                Useful for removing black bars or enlarging subtitles.
+              </div>
+            </div>
+
+            <!-- BRIGHTNESS SLIDER -->
+            <div class="setting-group">
+              <div style="display:flex; justify-content:space-between;">
+                <div class="input-label">Brightness</div>
+                <div class="input-label" id="brightVal">100%</div>
+              </div>
+              <input type="range" id="settingBrightness" min="0.5" max="1.5" step="0.1" value="1" class="cyber-range"
+                oninput="document.getElementById('brightVal').innerText = Math.round(this.value*100) + '%'; player.syncSettings();">
+            </div>
+
+          </div>
+
+          <div class="control-row">
+            <div class="control-info">
+              <div class="control-head">Autoplay Trailers & Streams</div>
+              <div class="control-sub">Start video immediately on load</div>
+            </div>
+            <label class="toggle-switch">
+              <!-- Added ID -->
+              <input type="checkbox" id="settingAutoplay" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="control-row">
+            <div class="control-info">
+              <div class="control-head">Hardware Acceleration</div>
+              <div class="control-sub">Use GPU for smoother UI rendering</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-group">
+            <div class="input-label">Preferred Streaming Source</div>
+            <div class="select-wrapper">
+              <!-- ID added: providerSelect -->
+              <select class="cyber-select" id="providerSelect">
+                <option>Loading Providers...</option>
+              </select>
+            </div>
+            <div class="control-sub" style="margin-top:5px;">
+              Switch if a video fails to load. 'VidSrc.to' is usually fastest.
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <div class="input-label">Default Resolution</div>
+            <div class="select-wrapper">
+              <!-- Added ID -->
+              <select class="cyber-select" id="settingResolution">
+                <option>Auto (Recommended)</option>
+                <option>4K Ultra HD</option>
+                <option>1080p Full HD</option>
+                <option>720p Data Saver</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: AUDIO & SUBTITLES -->
+        <div id="set-audio" class="set-panel">
+          <h2 class="panel-title">Audio & Subtitles</h2>
+
+          <!-- 1. PREFERRED LANGUAGE -->
+          <div class="setting-group">
+            <div class="input-label">Preferred Subtitle Language</div>
+            <div class="select-wrapper">
+              <select class="cyber-select" id="settingSubLang" onchange="player.syncSettings()">
+                <option value="">Default (Provider Choice)</option>
+                <option value="en">English</option>
+                <option value="es">Spanish (Español)</option>
+                <option value="fr">French (Français)</option>
+                <option value="de">German (Deutsch)</option>
+                <option value="it">Italian (Italiano)</option>
+                <option value="pt">Portuguese (Português)</option>
+                <option value="ru">Russian (Pусский)</option>
+                <option value="ar">Arabic (العربية)</option>
+                <option value="hi">Hindi (हिन्दी)</option>
+                <option value="ja">Japanese (日本語)</option>
+                <option value="ko">Korean (한국어)</option>
+              </select>
+            </div>
+            <div class="control-sub" style="margin-top:5px;">
+              Note: Applied automatically if supported by the source.
+            </div>
+          </div>
+
+          <!-- 2. SUBTITLE SIZE (Done via Zoom) -->
+          <div class="setting-group">
+            <div style="display:flex; justify-content:space-between;">
+              <div class="input-label">Subtitle Size (Zoom)</div>
+              <div class="input-label" id="subSizeVal">1.0x</div>
+            </div>
+            <input type="range" id="settingSubSize" min="1" max="1.3" step="0.05" value="1" class="cyber-range"
+              oninput="document.getElementById('subSizeVal').innerText = this.value + 'x'; player.syncSettings();">
+          </div>
+
+          <!-- 3. SUBTITLE TINT (The 'Aether' Hack) -->
+          <div class="setting-group">
+            <div class="input-label">Subtitle/Scene Tint</div>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+              <!-- White (Default) -->
+              <div class="color-swatch active" style="background:#fff;" onclick="player.setTint('none', this)"></div>
+              <!-- Yellow -->
+              <div class="color-swatch" style="background:#ffd700;" onclick="player.setTint('#ffd700', this)"></div>
+              <!-- Cyan -->
+              <div class="color-swatch" style="background:#00ffff;" onclick="player.setTint('#00ffff', this)"></div>
+              <!-- Pink -->
+              <div class="color-swatch" style="background:#ff00ff;" onclick="player.setTint('#ff00ff', this)"></div>
+            </div>
+            <div class="control-sub" style="margin-top:10px;">
+              Applies a visual filter to tint white subtitles.
+            </div>
+          </div>
+
+          <input type="hidden" id="settingSubColor" value="none">
+        </div>
+
+        <!-- TAB: SYSTEM -->
+        <div id="set-system" class="set-panel">
+          <h2 class="panel-title">System & Storage</h2>
+
+          <div class="setting-group">
+            <div class="input-label">Cache Storage (1.2 GB Used)</div>
+            <div class="storage-bar">
+              <div class="storage-fill" style="width: 45%;"></div>
+            </div>
+          </div>
+
+          <div class="control-row">
+            <div class="control-info">
+              <div class="control-head">Clear Search History</div>
+              <div class="control-sub">Remove locally saved search terms</div>
+            </div>
+            <button class="btn-small">Clear</button>
+          </div>
+
+          <div class="control-row">
+            <div class="control-info">
+              <div class="control-head">Debug Mode</div>
+              <div class="control-sub">Show FPS and API Latency</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div style="margin-top:50px; text-align:center; opacity:0.3; font-size:12px;">
+            AetherStream v2.4.0 (Build 8829)<br>Powered by TMDB API
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- VIEW: ORIGINALS (LEADERBOARD) -->
+  <section id="view-originals" class="view-container">
+    <div class="grid-header">
+      <div class="hero-badge">Most Watched</div>
+      <h1 class="grid-title">Aether Originals</h1>
+      <p style="color:var(--text-muted); margin-top:10px;">
+        The most popular content across the platform, ranked by real-time community views.
+      </p>
+    </div>
+
+    <div class="media-grid-h" id="originalsGrid"></div>
+  </section>
+
+  <!-- VIEW: USER PROFILE -->
+  <section id="view-profile" class="view-container">
+
+    <!-- 1. CINEMATIC HEADER (Dynamic) -->
+    <div class="profile-banner">
+      <div class="banner-img" id="profileCoverImg"></div>
+      <div class="banner-gradient"></div>
+      <div class="banner-content">
+        <div class="profile-avatar-xl">
+          <img src="" id="userPageAvatar" alt="User">
+        </div>
+        <div class="profile-identity">
+          <h1 id="userPageName">Traveler</h1>
+          <div class="profile-badges">
+            <span class="p-badge" id="memberSince">Member since 2025</span>
+            <span class="p-badge highlight" id="favGenreBadge">Action Fan</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-layout-advanced">
+
+      <!-- 2. ANALYTICS SIDEBAR -->
+      <div class="profile-stats-col">
+        <div class="stats-card">
+          <h3>Aether Stats</h3>
+          <div class="stat-grid">
+            <div class="stat-box">
+              <span class="val" id="statMovies">0</span>
+              <span class="lbl">Movies Saved</span>
+            </div>
+            <div class="stat-box">
+              <span class="val" id="statShows">0</span>
+              <span class="lbl">Shows Saved</span>
+            </div>
+            <div class="stat-box full">
+              <span class="val" id="statTotalItems">0</span>
+              <span class="lbl">Total Collection</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-card" style="margin-top:20px;">
+          <button class="btn btn-outline" style="width:100%; justify-content:center;" onclick="app.go('settings')">
+            <i class="fas fa-cog"></i> Settings
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. TABS CONTENT -->
+      <div class="profile-main-col">
+        <div class="profile-tabs">
+          <button class="tab-btn active" onclick="app.switchProfileTab('watchlist')">My Watchlist</button>
+          <button class="tab-btn" onclick="app.switchProfileTab('history')">Watch History</button>
+        </div>
+
+        <div id="tab-watchlist" class="profile-tab-content active">
+          <div class="media-grid" id="userPageGrid"></div>
+        </div>
+
+        <div id="tab-history" class="profile-tab-content" style="display:none;">
+          <div class="media-grid" id="userHistoryGrid"></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- VIEW: AUTH / LOGIN -->
+  <section id="view-auth" style="
+    position: fixed; inset: 0; z-index: 9999; background: var(--bg); 
+    display: flex; align-items: center; justify-content: center;
+    transition: var(--theme-transition);
+    ">
+
+    <div class="auth-card" style="
+      width: 100%; max-width: 400px; padding: 40px; 
+      background: var(--surface-glass); backdrop-filter: blur(20px);
+      border: 1px solid var(--border); border-radius: 20px;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.5); position: relative; overflow: hidden;
+    ">
+
+      <!-- Decorative Glow -->
+      <div
+        style="position: absolute; top: -50px; left: -50px; width: 150px; height: 150px; background: var(--accent); filter: blur(80px); opacity: 0.4; border-radius: 50%;">
+      </div>
+
+      <div style="text-align: center; margin-bottom: 30px; position: relative; z-index: 2;">
+        <div class="brand" style="justify-content: center; margin-bottom: 10px;">AETHER<span>.</span></div>
+        <p style="color: var(--text-muted); font-size: 14px;">Welcome back to the ultimate stream.</p>
+      </div>
+
+      <div id="authError"
+        style="color: #ff4444; font-size: 13px; text-align: center; margin-bottom: 15px; display: none;">Error message
+        here</div>
+
+      <!-- Inputs -->
+      <div class="setting-group">
+        <div class="input-label">Email</div>
+        <input type="email" id="authEmail" class="cyber-input" placeholder="user@example.com">
+      </div>
+
+      <div class="setting-group">
+        <div class="input-label">Password</div>
+        <input type="password" id="authPass" class="cyber-input" placeholder="••••••••">
+      </div>
+
+      <!-- Login Mode Buttons -->
+      <div id="btnContainerLogin">
+        <button class="btn btn-primary" onclick="app.handleLogin()"
+          style="width: 100%; justify-content: center; margin-bottom: 15px;">
+          Enter Aether
+        </button>
+        <div style="text-align: center; font-size: 12px; color: var(--text-muted); cursor: pointer;"
+          onclick="app.toggleAuthMode('signup')">
+          New here? <span style="color: var(--text); font-weight: 700;">Create Account</span>
+        </div>
+      </div>
+
+      <!-- Signup Mode Buttons (Hidden initially) -->
+      <div id="btnContainerSignup" style="display: none;">
+        <div class="setting-group">
+          <div class="input-label">Display Name</div>
+          <input type="text" id="authName" class="cyber-input" placeholder="Traveler">
+        </div>
+        <button class="btn btn-primary" onclick="app.handleRegister()"
+          style="width: 100%; justify-content: center; margin-bottom: 15px;">
+          Initialize Account
+        </button>
+        <div style="text-align: center; font-size: 12px; color: var(--text-muted); cursor: pointer;"
+          onclick="app.toggleAuthMode('login')">
+          Already have access? <span style="color: var(--text); font-weight: 700;">Sign In</span>
+        </div>
+      </div>
+
+      <div style="margin-top: 30px; border-top: 1px solid var(--border); padding-top: 20px;">
+        <button class="btn btn-blur" onclick="app.handleGoogleLogin()"
+          style="width: 100%; justify-content: center; font-size: 13px;">
+          <i class="fab fa-google"></i> Continue with Google
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="stream-modal" id="streamModal">
+
+    <!-- HEADER (Top Bar) -->
+    <div class="stream-header" id="streamHeader">
+      <div style="display:flex; align-items:center; gap:15px;">
+        <div class="close-icon-circle" onclick="player.close()" style="background:rgba(255,255,255,0.1);">
+          <i class="fas fa-arrow-left"></i>
+        </div>
+        <div>
+          <div class="stream-title" id="streamTitle">Loading Title...</div>
+          <div id="streamSourceLabel" class="stream-meta" style="margin:0; font-size:11px; opacity:0.7;">Source: ...
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:10px;">
+        <!-- SETTINGS TRIGGER (Inside Player) -->
+        <div class="control-btn" onclick="player.openSettings()">
+          <i class="fas fa-cog"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLAYER CONTENT -->
+    <div class="stream-content" id="streamContentArea">
+
+      <!-- LOADER -->
+      <div class="stream-loader" id="streamLoader">
+        <svg viewBox="0 0 50 50" class="spinner">
+          <circle cx="25" cy="25" r="20" fill="none" stroke-width="4"></circle>
+        </svg>
+      </div>
+
+      <!-- TINT OVERLAY -->
+      <div id="streamTintLayer"
+        style="position: absolute; inset: 0; pointer-events: none; z-index: 5; transition: background-color 0.3s;">
+      </div>
+
+      <!-- IFRAME -->
+      <iframe id="streamFrame" class="stream-frame" allowfullscreen allow="autoplay; encrypted-media; fullscreen"
+        style="border:none; opacity:0; transition: transform 0.3s;"></iframe>
+
+      <!-- OVERLAY CONTROLS (Middle & Bottom) -->
+      <div class="stream-controls-layer" id="streamControls">
+
+        <!-- Middle: Prev / Next Buttons -->
+        <div class="nav-controls">
+          <button class="nav-btn" id="btnPrevEp" onclick="player.prevEpisode()">
+            <i class="fas fa-step-backward"></i>
+          </button>
+
+          <!-- Refresh Button (Center) -->
+          <button class="nav-btn refresh-btn" onclick="player.refreshStream()" title="Reload Stream">
+            <i class="fas fa-redo-alt"></i>
+          </button>
+
+          <button class="nav-btn" id="btnNextEp" onclick="player.nextEpisode()">
+            <i class="fas fa-step-forward"></i>
+          </button>
+        </div>
+
+        <!-- Bottom: Info -->
+        <div class="bottom-info">
+          <div id="episodeNameLabel" style="font-size:14px; font-weight:600; text-shadow:0 2px 4px rgba(0,0,0,0.8);">
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <script type="module">
+    // 1. IMPORT FIREBASE MODULES
+    import { loginEmail, registerEmail, loginGoogle, logoutUser, initAuthObserver } from "./js/firebase/auth.js";
+    import { addToCloudList, removeFromCloudList, getUserData, saveUserSettings, trackGlobalView, getGlobalRankings } from "./js/firebase/db.js";
+    import { getAuth, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { player } from "./js/player/engine.js";
+
+    gsap.registerPlugin(ScrollTrigger);
+    // Expose player to window so HTML onclicks work
+    window.player = player;
+    /**
+     * AETHER STREAM - ULTIMATE EDITION
+     * Integrated with Firebase Auth
+     */
+    const API_KEY = '31280d77499208623732d77823eabcb4';
+    const BASE_URL = 'https://api.themoviedb.org/3';
+    const IMG_BASE = 'https://image.tmdb.org/t/p/original';
+    const POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
+    const LOGO_BASE = 'https://image.tmdb.org/t/p/w300';
+    const GENRE_MAP = { 28: 10759, 12: 10759, 35: 35, 80: 80, 18: 18, 14: 10765, 27: 9648, 878: 10765, 53: 9648 };
+
+    const api = {
+      get: async (endpoint, params = {}) => {
+        const query = new URLSearchParams({ api_key: API_KEY, language: 'en-US', ...params }).toString();
+        try {
+          const res = await fetch(`${BASE_URL}${endpoint}?${query}`);
+          return await res.json();
+        } catch (e) { console.error('API Error:', e); return {}; }
+      },
+      findVideo: async (id, type) => {
+        const endpoint = type === 'tv' ? `/tv/${id}/videos` : `/movie/${id}/videos`;
+        const data = await api.get(endpoint);
+        if (data.results) {
+          const trailer = data.results.find(v => v.type === 'Trailer') || data.results[0];
+          return trailer ? trailer.key : null;
+        }
+        return null;
+      }
+    };
+
+    const anim = {
+      initMagnetic: () => {
+        document.querySelectorAll('.magnetic').forEach(btn => {
+          btn.addEventListener('mousemove', (e) => {
+            const r = btn.getBoundingClientRect();
+            const x = e.clientX - r.left - r.width / 2;
+            const y = e.clientY - r.top - r.height / 2;
+            gsap.to(btn, { x: x * 0.3, y: y * 0.3, duration: 0.3, ease: 'power2.out' });
+          });
+          btn.addEventListener('mouseleave', () => {
+            gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1,0.5)' });
+          });
+        });
+      },
+      pageTrans: (viewId) => {
+        const view = document.getElementById(viewId);
+        gsap.fromTo(view, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out', delay: 0.2 });
+      }
+    };
+
+    const ui = {
+      card: (m, forcedType = null) => {
+        if (!m.poster_path) return null;
+        const div = document.createElement('div');
+        div.className = 'card gpu';
+        const title = m.title || m.name;
+        const type = m.media_type || forcedType || (m.title ? 'movie' : 'tv');
+        let label = m.media_type ? `<div class="card-label">${type === 'tv' ? 'TV Series' : 'Movie'}</div>` : '';
+        div.innerHTML = `${label}<img src="${POSTER_BASE}${m.poster_path}" loading="lazy" alt="${title}">`;
+        div.onclick = () => app.go('detail', { id: m.id, type: type });
+        return div;
+      },
+      row: (title, items, containerId, type = 'movie') => {
+        if (!items || !items.length) return;
+        const s = document.createElement('section');
+        s.className = 'row';
+        s.innerHTML = `<div class="row-head"><div class="row-title">${title}</div></div><div class="scroll-container"><div class="scroll-content"></div></div>`;
+        const sc = s.querySelector('.scroll-content');
+        items.forEach(m => { const c = ui.card(m, type); if (c) sc.appendChild(c); });
+        document.getElementById(containerId).appendChild(s);
+        gsap.to(s, { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out', scrollTrigger: { trigger: s, start: 'top 90%' } });
+        app.enableDrag(sc);
+      }
+    };
+
+
+    /* Add inside your script tag */
+    const initSpotlightAnimation = () => {
+      const section = document.querySelector('.spotlight-section');
+      const leftCol = document.querySelector('.spotlight-col-left');
+      const rightCol = document.querySelector('.spotlight-col-right');
+      const poster = document.querySelector('.poster-frame');
+      const textItems = document.querySelectorAll('.spotlight-title, .spotlight-genre, .spotlight-actions-left');
+
+      // 1. Fade in the whole block
+      gsap.to(section, {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: section,
+          start: "top 85%"
+        }
+      });
+
+      // 2. Inner Elements Stagger
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: "top 70%"
+        }
+      });
+
+      tl.from(poster, { scale: 0.9, opacity: 0, duration: 0.8, ease: "back.out(1.7)" })
+        .from(textItems, { y: 20, opacity: 0, stagger: 0.1, duration: 0.6 }, "-=0.6")
+        .from('.spotlight-scene-wrap', { clipPath: "inset(0 100% 0 0)", duration: 1, ease: "power4.out" }, "-=0.8")
+        .from('.detail-block', { opacity: 0, y: 20, stagger: 0.2 }, "-=0.5");
+    };
+
+    // --- APP DEFINITION ---
+    const app = {
+      state: {
+        user: null, // Stores Firebase User
+        menuOpen: false,
+        sidebarOpen: false,
+        searchOpen: false,
+        watchlist: JSON.parse(localStorage.getItem('aether_wl') || '[]'),
+        currentMedia: null,
+        pages: { movie: 1, tv: 1 },
+        currentParams: null,
+        allProviders: [],
+        visibleProvidersCount: 0
+      },
+
+      init: async () => {
+        app.initTheme();
+        anim.initMagnetic();
+        initAvatar(); // Init the avatar physics
+        player.init();
+        initSpotlightAnimation();
+        app.initSpotlightStrokes();
+
+        // -- FIREBASE AUTH LISTENER --
+        // This waits for Firebase to tell us if user is logged in
+        initAuthObserver(
+          async (user) => {
+            // USER LOGGED IN
+            app.state.user = user;
+            app.updateProfileUI(user);
+
+            // --- NEW: FETCH CLOUD DATA ---
+            const userData = await getUserData(user);
+            if (userData && userData.watchlist) {
+              app.state.watchlist = userData.watchlist;
+              // Refresh UI if on watchlist page or hero buttons
+              app.renderWatchlist();
+              // Force update hero button if current movie exists
+              if (app.state.currentMedia) {
+                const listBtn = document.getElementById('heroListBtn');
+                if (listBtn) app.updateListBtn(listBtn, app.state.currentMedia.id);
+              }
+            }
+
+            // Restore Settings (Theme)
+            if (userData && userData.settings) {
+              if (userData.settings.theme) {
+                const isDark = userData.settings.theme === 'dark';
+                document.getElementById('themeToggle').checked = isDark;
+                app.applyTheme(userData.settings.theme); // Helper function we will create
+              }
+            }
+
+            // Hide Auth Screen
+            const authView = document.getElementById('view-auth');
+            gsap.to(authView, {
+              opacity: 0, y: -50, duration: 0.8, ease: "power4.out",
+              onComplete: () => authView.style.display = 'none'
+            });
+          },
+          () => {
+            // USER LOGGED OUT
+            app.state.user = null;
+            app.state.watchlist = []; // Clear list on logout
+            app.renderWatchlist();
+
+            const authView = document.getElementById('view-auth');
+            authView.style.display = 'flex';
+            gsap.to(authView, { opacity: 1, y: 0, duration: 0.5 });
+          }
+        );
+
+        // Scroll Event
+        window.addEventListener('scroll', () => {
+          document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+        });
+
+        // Genres
+        const genres = [
+          { id: 28, name: 'Action' }, { id: 12, name: 'Adventure' }, { id: 35, name: 'Comedy' }, { id: 80, name: 'Crime' },
+          { id: 18, name: 'Drama' }, { id: 14, name: 'Fantasy' }, { id: 27, name: 'Horror' }, { id: 878, name: 'Sci-Fi' }, { id: 53, name: 'Thriller' }
+        ];
+        const gList = document.getElementById('genreList');
+        genres.forEach(g => {
+          const el = document.createElement('div'); el.className = 'genre-item'; el.innerText = g.name;
+          el.onclick = () => { app.toggleSidebar(false); app.go('network', { id: g.id, name: g.name, type: 'genre' }); };
+          gList.appendChild(el);
+        });
+
+        // --- FETCH DATA ---
+        const trending = await api.get('/trending/movie/week');
+        if (trending.results?.length) {
+          // Hero gets #1
+          app.renderHero(trending.results[0]);
+
+          // Spotlight gets #2 (or a random one from top 5)
+          // Using #2 ensures it's different from Hero
+          if (trending.results.length > 1) {
+            app.renderSpotlight(trending.results[1]);
+          }
+        }
+        //if (trending.results?.length) app.renderHero(trending.results[0]);
+        ui.row('Trending Movies', trending.results, 'homeRows', 'movie');
+
+        const trendingTv = await api.get('/trending/tv/week');
+        ui.row('Trending TV Shows', trendingTv.results, 'homeRows', 'tv');
+
+        const topTv = await api.get('/tv/top_rated');
+        ui.row('Critically Acclaimed Series', topTv.results, 'homeRows', 'tv');
+
+        const action = await api.get('/discover/movie', { with_genres: 28 });
+        ui.row('Adrenaline Rush', action.results, 'homeRows', 'movie');
+
+        app.renderHomeProviders();
+
+        // Listeners
+        document.getElementById('menuToggle').onclick = app.toggleMenu;
+        document.getElementById('sidebarToggle').onclick = app.toggleSidebar;
+        document.getElementById('searchInput').addEventListener('input', app.handleSearch);
+      },
+
+      // --- AUTH UI HANDLERS ---
+      toggleAuthMode: (mode) => {
+        const loginBox = document.getElementById('btnContainerLogin');
+        const signupBox = document.getElementById('btnContainerSignup');
+        const errorMsg = document.getElementById('authError');
+
+        errorMsg.style.display = 'none';
+
+        if (mode === 'signup') {
+          gsap.to(loginBox, { height: 0, opacity: 0, overflow: 'hidden', duration: 0.3, onComplete: () => loginBox.style.display = 'none' });
+          signupBox.style.display = 'block';
+          gsap.fromTo(signupBox, { height: 0, opacity: 0 }, { height: 'auto', opacity: 1, duration: 0.3 });
+        } else {
+          gsap.to(signupBox, { height: 0, opacity: 0, overflow: 'hidden', duration: 0.3, onComplete: () => signupBox.style.display = 'none' });
+          loginBox.style.display = 'block';
+          gsap.fromTo(loginBox, { height: 0, opacity: 0 }, { height: 'auto', opacity: 1, duration: 0.3 });
+        }
+      },
+
+      handleLogin: async () => {
+        const email = document.getElementById('authEmail').value;
+        const pass = document.getElementById('authPass').value;
+        const errorMsg = document.getElementById('authError');
+
+        const res = await loginEmail(email, pass);
+        if (!res.success) {
+          errorMsg.innerText = res.error;
+          errorMsg.style.display = 'block';
+          gsap.from(errorMsg, { x: 5, duration: 0.1, repeat: 3, yoyo: true });
+        }
+      },
+
+      handleRegister: async () => {
+        const email = document.getElementById('authEmail').value;
+        const pass = document.getElementById('authPass').value;
+        const name = document.getElementById('authName').value;
+        const errorMsg = document.getElementById('authError');
+
+        if (!name) { errorMsg.innerText = "Name required"; errorMsg.style.display = 'block'; return; }
+
+        const res = await registerEmail(email, pass, name);
+        if (!res.success) {
+          errorMsg.innerText = res.error;
+          errorMsg.style.display = 'block';
+        }
+      },
+
+      handleGoogleLogin: async () => {
+        const res = await loginGoogle();
+        if (!res.success) alert(res.error);
+      },
+
+      signOut: async () => {
+        await logoutUser();
+        // App state cleared by observer callback
+      },
+
+      updateProfileUI: (user) => {
+        if (!user) return;
+
+        const nameInput = document.getElementById('settingsName');
+        const emailInput = document.getElementById('settingsEmail');
+
+        if (nameInput) nameInput.value = user.displayName || 'Aether Traveler';
+        if (emailInput) emailInput.value = user.email || 'No Email Linked';
+
+        // Update images
+        if (user.photoURL) {
+          document.querySelectorAll('.profile-img, .avatar-large img').forEach(img => {
+            img.src = user.photoURL;
+          });
+
+          // --- NEW: Highlight the correct avatar in the grid ---
+          const gridItems = document.querySelectorAll('.avatar-item img');
+          gridItems.forEach(img => {
+            if (img.src === user.photoURL) {
+              // Remove selected from others
+              document.querySelectorAll('.avatar-item').forEach(i => i.classList.remove('selected'));
+              // Add to this parent
+              img.parentElement.classList.add('selected');
+            }
+          });
+        }
+      },
+
+      // --- AVATAR SELECTION LOGIC ---
+      selectAvatar: async (el) => {
+        // 1. UI: Handle Selection Classes
+        const grid = document.getElementById('avatarGrid');
+        const items = grid.querySelectorAll('.avatar-item');
+
+        items.forEach(item => item.classList.remove('selected'));
+        el.classList.add('selected');
+
+        // 2. Get the new Image URL
+        const newSrc = el.querySelector('img').src;
+
+        // 3. UI: Update all profile images across the app instantly
+        // (Navbar Orb, Settings Header, etc)
+        const profileImages = document.querySelectorAll('.profile-img, .avatar-large img');
+        profileImages.forEach(img => {
+          // Optional: Fade animation
+          gsap.to(img, {
+            opacity: 0.5, duration: 0.1, onComplete: () => {
+              img.src = newSrc;
+              gsap.to(img, { opacity: 1, duration: 0.2 });
+            }
+          });
+        });
+
+        // 4. FIREBASE: Save to Cloud (Persistent)
+        if (app.state.user) {
+          try {
+            const auth = getAuth(); // Get auth instance
+            await updateProfile(auth.currentUser, {
+              photoURL: newSrc
+            });
+            console.log("Avatar updated in cloud");
+          } catch (error) {
+            console.error("Error updating avatar:", error);
+          }
+        } else {
+          // Fallback for non-logged-in users (Session only)
+          localStorage.setItem('temp_avatar', newSrc);
+        }
+      },
+      // --- EXISTING FUNCTIONALITY BELOW ---
+
+      initTheme: () => {
+        const savedTheme = localStorage.getItem('aether_theme');
+        const toggle = document.getElementById('themeToggle');
+        if (savedTheme === 'light') {
+          document.documentElement.setAttribute('data-theme', 'light');
+          if (toggle) toggle.checked = false;
+        } else {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          if (toggle) toggle.checked = true;
+        }
+      },
+
+      // Helper to just apply CSS
+      applyTheme: (themeName) => {
+        document.documentElement.setAttribute('data-theme', themeName);
+        localStorage.setItem('aether_theme', themeName);
+        if (themeName === 'light') {
+          gsap.to('body', { backgroundColor: '#f3f4f6', duration: 0.5 });
+        } else {
+          gsap.to('body', { backgroundColor: '#050505', duration: 0.5 });
+        }
+      },
+
+      toggleTheme: () => {
+        const isDark = document.getElementById('themeToggle').checked;
+        const newTheme = isDark ? 'dark' : 'light';
+
+        // 1. Apply visual change
+        app.applyTheme(newTheme);
+
+        // 2. Save to Cloud
+        if (app.state.user) {
+          saveUserSettings(app.state.user, { theme: newTheme });
+        }
+      },
+      renderHero: (m) => {
+        document.getElementById('heroBg').src = IMG_BASE + m.backdrop_path;
+        document.getElementById('heroTitle').innerText = m.title || m.name;
+        document.getElementById('heroDesc').innerText = m.overview.substring(0, 180) + '...';
+        const playBtn = document.getElementById('heroPlayBtn');
+        playBtn.onclick = () => app.playVideo(m.id, m.media_type || 'movie', m.title || m.name);
+        // Add Stream Button next to Play Trailer
+        const heroContent = document.querySelector('.hero-content div[style="display:flex; gap:16px;"]');
+
+        // Create new button
+        const streamBtn = document.createElement('button');
+        streamBtn.className = 'btn btn-primary magnetic';
+        streamBtn.innerHTML = `<i class="fas fa-play"></i> Watch Now`;
+        streamBtn.style.background = 'var(--accent)';
+        streamBtn.style.color = '#fff';
+        streamBtn.style.border = 'none';
+
+        // Insert before "My List"
+        heroContent.insertBefore(streamBtn, document.getElementById('heroListBtn'));
+
+        // Handle Click (Need to fetch External IDs for ShowBox support)
+        streamBtn.onclick = async () => {
+          // Quick fetch of details if needed to ensure we have IMDB ID
+          const fullData = await api.get(`/${m.media_type || 'movie'}/${m.id}`, { append_to_response: 'external_ids' });
+          player.open(fullData);
+        };
+        const listBtn = document.getElementById('heroListBtn');
+        listBtn.onclick = () => app.toggleWatchlist(m);
+        app.updateListBtn(listBtn, m.id);
+        gsap.to('#heroBg', { yPercent: 20, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } });
+      },
+
+      renderSpotlight: async (m) => {
+        if (!m) return;
+
+        // Fetch full details including credits
+        const fullData = await api.get(`/movie/${m.id}`, { append_to_response: 'credits,videos' });
+
+        // --- Poster and backdrop URLs ---
+        const posterUrl = m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '';
+        const backdropUrl = m.backdrop_path ? `https://image.tmdb.org/t/p/original${m.backdrop_path}` : posterUrl;
+
+        // --- Spotlight background ---
+        const section = document.querySelector('.spotlight-section');
+        if (section) {
+          section.style.backgroundImage = `
+      linear-gradient(to bottom, rgba(5,5,5,0.4), rgba(5,5,5,0.9)),
+      url('${backdropUrl}')
+    `;
+          section.style.backgroundSize = 'cover';
+          section.style.backgroundPosition = 'center';
+          section.style.backgroundRepeat = 'no-repeat';
+        }
+
+        // --- Spotlight poster ---
+        const posterElem = document.getElementById('spotlightPoster');
+        if (posterElem) posterElem.src = posterUrl;
+
+        // --- Spotlight scene / trailer container ---
+        const sceneImg = document.getElementById('spotlightBackdrop');
+        if (sceneImg) {
+          // Use backdrop if available, fallback to poster
+          sceneImg.src = backdropUrl;
+          sceneImg.alt = m.title || 'Scene';
+        }
+
+        // --- Title and description ---
+        const titleElem = document.getElementById('spotlightTitle');
+        if (titleElem) titleElem.innerHTML = `
+    ${m.title}<br>
+    <span style="color:var(--accent); font-size:0.6em;">
+      ${m.release_date?.split('-')[0] || ''}
+    </span>
+  `;
+        const descElem = document.getElementById('spotlightDesc');
+        if (descElem) descElem.innerText = m.overview || '';
+
+        // --- Meta: Rating, Votes, Status, Runtime ---
+        document.getElementById('spotlightRating').innerText = m.vote_average?.toFixed(1) || 'N/A';
+        document.getElementById('spotlightVotes').innerText = m.vote_count?.toLocaleString() || '0';
+        document.getElementById('spotlightStatus').innerText = fullData.status || 'Released';
+
+        const runtime = fullData.runtime || 0;
+        const hours = Math.floor(runtime / 60);
+        const minutes = runtime % 60;
+        document.getElementById('spotlightRuntime').innerText = `${hours}h ${minutes}m`;
+
+        // --- Director ---
+        const director = fullData.credits.crew.find(c => c.job === 'Director');
+        document.getElementById('spotlightDirector').innerText = director ? director.name : 'Unknown';
+
+        // --- Genres ---
+        const genres = fullData.genres.map(g => g.name).slice(0, 3).join(' / ');
+        document.getElementById('spotlightGenres').innerText = genres;
+
+        // --- Top 3 Cast ---
+        const castContainer = document.getElementById('spotlightCast');
+        castContainer.innerHTML = '';
+        fullData.credits.cast.slice(0, 3).forEach(actor => {
+          if (actor.profile_path) {
+            const img = document.createElement('img');
+            img.src = `https://image.tmdb.org/t/p/w276_and_h350_face${actor.profile_path}`;
+            img.alt = actor.name;
+            img.title = actor.name;
+            castContainer.appendChild(img);
+          }
+        });
+
+        // --- Buttons ---
+        const watchBtn = document.getElementById('spotlightWatchBtn');
+        const sceneBtn = document.getElementById('spotlightSceneBtn'); // trailer container
+        const listBtn = document.getElementById('spotlightListBtn');
+
+        const playAction = () => {
+          // Play the video/trailer
+          let trailer = fullData.videos.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
+          if (trailer) {
+            app.playVideo(trailer.key, 'movie', m.title); // Pass YouTube key
+          } else {
+            app.playVideo(m.id, 'movie', m.title); // fallback
+          }
+        };
+
+        if (watchBtn) watchBtn.onclick = playAction;
+        if (sceneBtn) sceneBtn.onclick = playAction;
+        if (listBtn) listBtn.onclick = () => app.toggleWatchlist(m);
+        app.updateListBtn(listBtn, m.id);
+      },
+
+
+      // SPOTLIGHT STROKES — CINEMATIC INTRO ANIMATION
+      initSpotlightStrokes: () => {
+        const tl = gsap.timeline({ repeat: -1 });
+
+        // Fade in layers with stagger
+        gsap.set(".stroke-layer", { x: "-33%", opacity: 0 });
+
+        // Layer 1: Fastest
+        tl.to(".layer-1", {
+          x: "33%",
+          opacity: 1,
+          duration: 14,
+          ease: "none"
+        }, 0);
+
+        // Layer 2: Medium
+        tl.to(".layer-2", {
+          x: "33%",
+          opacity: 0.8,
+          duration: 20,
+          ease: "none"
+        }, 0);
+
+        // Layer 3: Slowest (parallax)
+        tl.to(".layer-3", {
+          x: "33%",
+          opacity: 0.6,
+          duration: 28,
+          ease: "none"
+        }, 0);
+
+        // Optional: Restart with variation every 30s
+        setInterval(() => {
+          gsap.to(".stroke-layer", { opacity: 0, duration: 1 });
+          setTimeout(() => {
+            gsap.set(".stroke-layer", { x: "-33%" });
+            app.initSpotlightStrokes();
+          }, 1200);
+        }, 40000);
+      },
+
+      renderHomeProviders: async () => {
+        // 1. Define the Priority Networks we want to show (IDs from TMDB)
+        // 8: Netflix, 337: Disney+, 9: Amazon Prime, 350: Apple TV+, 15: Hulu, 1899: Max, 283: Crunchyroll
+        //const priorityIds = [8, 337, 9, 350, 15, 1899, 283];
+
+        const priorityIds = [
+          8,     // Netflix
+          9,     // Amazon Prime Video
+          337,   // Disney+
+          350,   // Max (HBO)
+          15,    // Hulu
+          283,   // Apple TV+
+          1899,  // Paramount+
+
+          // Additional Major Global Providers
+          531,   // Peacock
+          384,   // DAZN
+          387,   // Crunchyroll
+          386,   // Discovery+
+          192,   // YouTube Premium
+          40,    // Hotstar
+          188,   // Google Play Movies
+          24,    // SKY
+          1796,  // Lionsgate+
+          1853,  // Amazon Freevee
+          235,   // Rakuten TV
+          207,   // MUBI
+          27,    // Viaplay
+          185,   // Vudu
+          339,   // NOW (UK)
+          232,   // Plex
+          247,   // Shudder
+          443,   // AMC+
+          122,   // HBO GO (legacy)
+          100,   // iTunes
+          2,     // Apple iTunes Store (rent/buy)
+          531,   // FuboTV
+          309,   // Star+
+          118,   // CuriosityStream
+          213,   // Netflix Originals (used often in your UI)
+        ];
+
+        // 2. Fetch Providers from TMDB
+        const res = await api.get('/watch/providers/movie', { watch_region: 'US' });
+
+        if (res.results) {
+          const track = document.getElementById('homeProviders');
+          track.innerHTML = '';
+
+          // 3. Filter only the major networks and Sort by priority
+          const networks = res.results.filter(p => priorityIds.includes(p.provider_id));
+
+          // Sort them based on our priority list order
+          networks.sort((a, b) => priorityIds.indexOf(a.provider_id) - priorityIds.indexOf(b.provider_id));
+
+          networks.forEach(p => {
+            const d = document.createElement('div');
+            d.className = 'provider-pill';
+
+            // 4. Use HIGH RES 'original' image path (Transparent PNGs)
+            //const logoUrl = `https://image.tmdb.org/t/p/original${p.logo_path}`;
+
+            const logoUrl = p.logo_path
+              ? `https://media.themoviedb.org/t/p/h60${p.logo_path}`
+              : 'fallback.png';
+
+            d.innerHTML = `<img src="${logoUrl}" class="provider-logo" alt="${p.name}">`;
+
+            // On Click: Open Network View
+            d.onclick = () => app.go('network', {
+              id: p.provider_id,
+              name: p.provider_name,
+              type: 'provider'
+            });
+
+            track.appendChild(d);
+          });
+        }
+      },
+      toggleProviderGrid: async (shouldOpen) => {
+        const ov = document.getElementById('providerOverlay');
+        const grid = document.getElementById('providerGrid');
+        gsap.killTweensOf(ov);
+        if (shouldOpen) {
+          ov.style.display = 'block';
+          ov.style.opacity = 0;
+          await gsap.to(ov, { opacity: 1, duration: 0.35, ease: "power2.out" });
+          if (app.state.allProviders.length === 0) {
+            grid.innerHTML = `<div style="color:var(--text); text-align:center; grid-column:1/-1; padding:40px;">Fetching global providers...</div>`;
+            const res = await api.get('/watch/providers/movie', { watch_region: 'US' });
+            if (res.results) {
+              app.state.allProviders = res.results.sort((a, b) => a.display_priority - b.display_priority);
+              grid.innerHTML = '';
+              app.state.visibleProvidersCount = 0;
+              app.renderProviderBatch();
+            }
+          }
+        } else {
+          await gsap.to(ov, { opacity: 0, duration: 0.25, onComplete: () => ov.style.display = 'none' });
+        }
+      },
+
+      renderProviderBatch: () => {
+        const slice = app.state.allProviders.slice(app.state.visibleProvidersCount, app.state.visibleProvidersCount + 24);
+        const grid = document.getElementById('providerGrid');
+        const btn = document.getElementById('providerLoadMoreBtn');
+        if (slice.length === 0) { btn.style.display = 'none'; return; }
+        const newCards = [];
+        slice.forEach(p => {
+          const el = document.createElement('div'); el.className = 'provider-card-lg';
+          el.innerHTML = `<img src="${LOGO_BASE}${p.logo_path}" loading="lazy" alt="${p.provider_name}"><div class="provider-name">${p.provider_name}</div>`;
+          el.onclick = () => { app.toggleProviderGrid(false); app.go('network', { id: p.provider_id, name: p.provider_name, type: 'provider' }); };
+          grid.appendChild(el);
+          newCards.push(el);
+        });
+        app.state.visibleProvidersCount += slice.length;
+        gsap.from(newCards, { y: 30, opacity: 0, scale: 0.95, duration: 0.45, stagger: 0.05, clearProps: "all" });
+        btn.style.display = (app.state.visibleProvidersCount >= app.state.allProviders.length) ? 'none' : 'block';
+      },
+
+      go: async (view, params = null) => {
+        app.toggleSidebar(false);
+        if (app.state.menuOpen) app.toggleMenu();
+        if (app.state.searchOpen) app.toggleSearch();
+        app.toggleProviderGrid(false);
+        const current = document.querySelector('.view-container.active');
+        if (current) {
+          gsap.to(current, { opacity: 0, duration: 0.3, onComplete: () => { current.classList.remove('active'); current.style.display = 'none'; } });
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const target = document.getElementById(`view-${view}`);
+        if (view === 'detail') await app.loadDetail(params);
+        if (view === 'network') await app.initNetworkView(params);
+        if (view === 'watchlist') app.renderWatchlist();
+        // NEW VIEWS
+        if (view === 'originals') await app.loadOriginals();
+        if (view === 'profile') app.loadProfile();
+        const closeBtn = document.getElementById('closeViewBtn');
+        if (view === 'home') closeBtn.classList.remove('active');
+        else closeBtn.classList.add('active');
+        setTimeout(() => { target.style.display = 'block'; target.classList.add('active'); anim.pageTrans(`view-${view}`); }, 300);
+      },
+
+      loadDetail: async (params) => {
+        const { id, type } = params;
+        const endpoint = type === 'tv' ? `/tv/${id}` : `/movie/${id}`;
+        const m = await api.get(endpoint, { append_to_response: 'external_ids' });
+        //const m = await api.get(endpoint);
+        const credits = await api.get(`${endpoint}/credits`);
+        const recs = await api.get(`${endpoint}/recommendations`);
+
+        m.media_type = type;
+        app.state.currentMedia = m;
+
+        // 1. Populate Basic Info
+        document.getElementById('dtBackdrop').src = IMG_BASE + m.backdrop_path;
+        document.getElementById('dtPoster').src = POSTER_BASE + m.poster_path;
+        document.getElementById('dtTitle').innerText = m.title || m.name;
+        document.getElementById('dtDesc').innerText = m.overview;
+
+        const date = m.release_date || m.first_air_date;
+        document.getElementById('dtYear').innerText = date ? date.split('-')[0] : 'N/A';
+
+        const runtimeEl = document.getElementById('dtRuntime');
+        if (type === 'tv') {
+          runtimeEl.innerText = `${m.number_of_seasons} Seasons • ${m.number_of_episodes} Eps`;
+        } else {
+          runtimeEl.innerText = m.runtime ? `${Math.floor(m.runtime / 60)}h ${m.runtime % 60}m` : 'N/A';
+        }
+
+        // 2. Buttons
+        const playBtn = document.getElementById('dtPlayBtn');
+        playBtn.onclick = () => app.playVideo(m.id, type, m.title || m.name);
+
+        // FIND THE BUTTON CONTAINER
+        const btnContainer = document.querySelector('#view-detail .detail-info div[style="display:flex; gap:16px; margin-bottom:50px;"]');
+
+        // Remove old stream button if exists (to prevent duplicates)
+        const oldBtn = document.getElementById('dtStreamBtn');
+        if (oldBtn) oldBtn.remove();
+
+        // Create Stream Button
+        const streamBtn = document.createElement('button');
+        streamBtn.id = 'dtStreamBtn';
+        streamBtn.className = 'btn btn-primary magnetic';
+        streamBtn.innerHTML = `<i class="fas fa-play"></i> Start Streaming`;
+        streamBtn.style.background = 'var(--accent)';
+        streamBtn.style.color = '#fff';
+        streamBtn.style.border = 'none';
+
+        // Insert before "Add to List"
+        btnContainer.insertBefore(streamBtn, document.getElementById('dtListBtn'));
+
+        streamBtn.onclick = () => {
+          player.open(m, null, null); // Movie
+        };
+
+        const listBtn = document.getElementById('dtListBtn');
+        listBtn.onclick = () => app.toggleWatchlist(m);
+        app.updateListBtn(listBtn, m.id);
+
+        // 3. SEASONS LOGIC (Updated)
+        const seasonContainer = document.getElementById('seasonContainer');
+        const seasonList = document.getElementById('dtSeasons');
+        const dtEpisodes = document.getElementById('dtEpisodes');
+        const epHeader = document.getElementById('episodesHeader');
+
+        // Reset areas
+        seasonList.innerHTML = '';
+        dtEpisodes.innerHTML = '';
+        epHeader.style.display = 'none';
+
+        if (type === 'tv' && m.seasons) {
+          seasonContainer.style.display = 'block';
+
+          m.seasons.forEach(s => {
+            // Filter out Season 0 (Specials) usually
+            if (s.season_number > 0 && s.poster_path) {
+              const div = document.createElement('div');
+              div.className = 'season-card';
+              div.innerHTML = `
+                <img class="season-img" src="${POSTER_BASE}${s.poster_path}">
+                <div class="season-info">S${s.season_number} • ${s.episode_count} eps</div>
+              `;
+              seasonList.appendChild(div);
+
+              // Click Handler for Season
+              div.onclick = async () => {
+                // A. Visual Selection
+                document.querySelectorAll('.season-card').forEach(c => c.classList.remove('active'));
+                div.classList.add('active');
+
+                // B. Fetch Episodes
+                try {
+                  // Show Loading Text
+                  dtEpisodes.innerHTML = '<div style="color:#666; padding:10px;">Loading episodes...</div>';
+                  epHeader.style.display = 'block';
+
+                  const epData = await api.get(`/tv/${m.id}/season/${s.season_number}`);
+
+                  // C. Render Episodes
+                  await app.renderEpisodes({
+                    episodes: epData.episodes,
+                    seasonNumber: s.season_number,
+                    showName: m.name,
+                    showId: m.id
+                  });
+                } catch (err) {
+                  console.error(err);
+                  dtEpisodes.innerHTML = '<div style="color:red">Error loading episodes</div>';
+                }
+              };
+            }
+          });
+        } else {
+          seasonContainer.style.display = 'none';
+        }
+
+        // 4. Cast & Recs
+        const castEl = document.getElementById('dtCast');
+        castEl.innerHTML = '';
+        if (credits.cast) {
+          credits.cast.slice(0, 10).forEach(p => {
+            if (p.profile_path) {
+              castEl.innerHTML += `<div class="cast-item"><img class="cast-img" src="${POSTER_BASE}${p.profile_path}"><div>${p.name}</div></div>`;
+            }
+          });
+        }
+
+        const recEl = document.getElementById('recContainer');
+        recEl.innerHTML = '';
+        ui.row('More Like This', recs.results, 'recContainer', type);
+      },
+
+      // --- ORIGINALS (Global Ranking) ---
+      /* INSIDE app object */
+
+      loadOriginals: async () => {
+        const grid = document.getElementById('originalsGrid');
+        if (!grid) return;
+
+        grid.innerHTML = '<div style="grid-column:1/-1; color:var(--text-muted); padding:40px; text-align:center;">Fetching global leaderboard...</div>';
+
+        try {
+          const rankings = await getGlobalRankings(20);
+
+          grid.innerHTML = '';
+
+          if (!rankings || rankings.length === 0) {
+            grid.innerHTML = '<div style="grid-column:1/-1; color:var(--text-muted); padding:40px; text-align:center;">No data yet.</div>';
+            return;
+          }
+
+          for (let i = 0; i < rankings.length; i++) {
+            let item = rankings[i];
+            const type = item.media_type || 'movie';
+
+            // 1. Hydrate if missing BACKDROP (Horizontal Image)
+            if (!item.backdrop_path) {
+              try {
+                const res = await api.get(`/${type}/${item.id}`);
+                if (res) item = { ...item, ...res };
+              } catch (e) {
+                continue;
+              }
+            }
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'ranked-wrapper';
+
+            // 2. Use BACKDROP_PATH for Horizontal Card
+            // Fallback to poster_path if backdrop is missing
+            const imgPath = item.backdrop_path || item.poster_path;
+
+            const imgUrl = imgPath
+              ? `https://image.tmdb.org/t/p/w500${imgPath}`
+              : 'https://via.placeholder.com/500x280?text=No+Image';
+
+            wrapper.innerHTML = `
+        <div class="rank-badge">${i + 1}</div>
+        <div class="ranked-card">
+          <img src="${imgUrl}" loading="lazy" alt="${item.title}">
+          
+          <!-- Metadata Overlay -->
+          <div class="ranked-meta">
+            <div class="ranked-title">${item.title || item.name}</div>
+            <div class="view-counter">
+              <i class="fas fa-eye"></i> ${item.view_count || 1}
+            </div>
+          </div>
+        </div>
+      `;
+
+            wrapper.querySelector('.ranked-card').onclick = () => {
+              app.go('detail', { id: item.id, type: type });
+            };
+
+            grid.appendChild(wrapper);
+          }
+
+          gsap.fromTo('.ranked-wrapper',
+            { y: 50, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.5, stagger: 0.05, ease: "back.out(1.2)" }
+          );
+
+        } catch (err) {
+          console.error(err);
+        }
+      },
+      // --- PROFILE PAGE ---
+      /*loadProfile: () => {
+        const user = app.state.user;
+        if (!user) {
+          // Redirect to login if not logged in? Or show guest
+          return;
+        }
+
+        // 1. Populate Info
+        document.getElementById('userPageName').innerText = user.displayName || 'Traveler';
+        document.getElementById('userPageEmail').innerText = user.email;
+        document.getElementById('userListCount').innerText = app.state.watchlist.length;
+
+        const avatar = document.getElementById('userPageAvatar');
+        avatar.src = user.photoURL || "https://mir-s3-cdn-cf.behance.net/project_modules/disp/84c20033850498.56ba69ac290ea.png";
+
+        // 2. Populate Grid with Watchlist (or History if you implement it)
+        const grid = document.getElementById('userPageGrid');
+        grid.innerHTML = '';
+
+        if (app.state.watchlist.length === 0) {
+          grid.innerHTML = '<div style="color:#666">Your library is empty.</div>';
+        } else {
+          app.state.watchlist.forEach(m => {
+            const c = ui.card(m, m.media_type);
+            if (c) grid.appendChild(c);
+          });
+        }
+      },*/
+
+      loadProfile: async () => {
+        const user = app.state.user;
+
+        // 1. Security Check: Redirect if not logged in
+        if (!user) return app.go('home');
+
+        // 2. Populate Basic User Info
+        document.getElementById('userPageName').innerText = user.displayName || 'Traveler';
+        // Use high-res avatar if available, otherwise default
+        document.getElementById('userPageAvatar').src = user.photoURL || "https://mir-s3-cdn-cf.behance.net/project_modules/disp/84c20033850498.56ba69ac290ea.png";
+
+        // 3. Fetch User Data (Watchlist & History) from Firestore
+        // getUserData returns { watchlist: [], history: [], settings: {} }
+        const userData = await getUserData(user);
+        const list = userData.watchlist || [];
+        const history = userData.history || [];
+
+        // 4. Calculate Analytics (Stats)
+        const movieCount = list.filter(i => i.media_type === 'movie').length;
+        const showCount = list.filter(i => i.media_type === 'tv').length;
+
+        // Update Stats UI
+        document.getElementById('statMovies').innerText = movieCount;
+        document.getElementById('statShows').innerText = showCount;
+        document.getElementById('statTotalItems').innerText = list.length;
+
+        // Determine User "Badge" based on viewing habits
+        const badge = document.getElementById('favGenreBadge');
+        if (list.length === 0) badge.innerText = "Newcomer";
+        else if (movieCount > showCount) badge.innerText = "Film Buff";
+        else badge.innerText = "Series Binger";
+
+        // 5. Dynamic Cover Art Logic
+        // Use the last watched item (History) or last saved item (Watchlist) as banner
+        const lastItem = history[history.length - 1] || list[list.length - 1];
+        const coverDiv = document.getElementById('profileCoverImg');
+
+        if (lastItem && lastItem.backdrop_path) {
+          // IMG_BASE is defined globally (https://image.tmdb.org/t/p/original)
+          coverDiv.style.backgroundImage = `url(${IMG_BASE + lastItem.backdrop_path})`;
+        } else {
+          // Default fallback image (Dune 2 backdrop)
+          coverDiv.style.backgroundImage = `url(https://image.tmdb.org/t/p/original/rULWuutDCN5PvwmUdbryohj9lBb.jpg)`;
+        }
+
+        // 6. Universal List Renderer
+        // Handles both Watchlist (Go to Detail) and History (Resume Play)
+        const renderList = (data, containerId, isHistory = false) => {
+          const grid = document.getElementById(containerId);
+          grid.innerHTML = ''; // Clear previous content
+
+          if (!data || !data.length) {
+            grid.innerHTML = '<div style="color:var(--text-muted); padding:20px;">Your collection is empty.</div>';
+            return;
+          }
+
+          // Reverse array to show newest items first
+          [...data].reverse().forEach(m => {
+            // Create the standard card using UI helper
+            // Ensure media_type is set for the card logic
+            const type = m.media_type || (m.title ? 'movie' : 'tv');
+            const c = ui.card(m, type);
+
+            if (c) {
+              // --- HISTORY SPECIFIC LOGIC ---
+              if (isHistory) {
+                // Override the default onclick.
+                // Instead of going to Detail View, we open the Player.
+
+                // 1. Add Visual Play Overlay
+                const playOverlay = document.createElement('div');
+                playOverlay.style.cssText = `
+                        position:absolute; inset:0; background:rgba(0,0,0,0.6);
+                        display:flex; align-items:center; justify-content:center;
+                        opacity:0; transition:0.3s; pointer-events:none;
+                        backdrop-filter:blur(2px);
+                    `;
+                playOverlay.innerHTML = `<i class="fas fa-play" style="font-size:32px; color:#fff; filter:drop-shadow(0 0 10px rgba(229,9,20,0.8));"></i>`;
+                c.appendChild(playOverlay);
+
+                // 2. Hover Effects
+                c.onmouseenter = () => playOverlay.style.opacity = 1;
+                c.onmouseleave = () => playOverlay.style.opacity = 0;
+
+                // 3. Add Season/Episode Badge if applicable
+                if (type === 'tv' && m.season && m.episode) {
+                  const epLabel = document.createElement('div');
+                  epLabel.innerHTML = `S${m.season} E${m.episode}`;
+                  epLabel.style.cssText = `
+                            position:absolute; top:8px; right:8px; 
+                            background:var(--accent); color:#fff; 
+                            font-size:10px; font-weight:800; padding:4px 8px; 
+                            border-radius:4px; z-index:2; box-shadow:0 2px 5px rgba(0,0,0,0.5);
+                        `;
+                  c.appendChild(epLabel);
+                }
+
+                // 4. Click to Resume
+                c.onclick = () => {
+                  // Close profile view logic is handled by player.open internally (via sync or UI)
+                  // Pass stored season/episode to resume specific point
+                  player.open(m, m.season || null, m.episode || null);
+                };
+              }
+
+              grid.appendChild(c);
+            }
+          });
+        };
+
+        // Render Watchlist (Standard behavior)
+        renderList(list, 'userPageGrid', false);
+
+        // Render History (Resume behavior)
+        renderList(history, 'userHistoryGrid', true);
+      },
+      // --- TAB SWITCHER HELPER ---
+      switchProfileTab: (tabName) => {
+        // Reset buttons
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        // Hide content
+        document.querySelectorAll('.profile-tab-content').forEach(c => c.style.display = 'none');
+
+        // Activate selected
+        const clickedBtn = event.target;
+        clickedBtn.classList.add('active');
+
+        const targetContent = document.getElementById(`tab-${tabName}`);
+        targetContent.style.display = 'block';
+
+        // Animation
+        gsap.fromTo(targetContent, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3 });
+      },
+      renderEpisodes: async (params) => {
+        const { episodes, seasonNumber, showName, showId } = params;
+        const dtEpisodes = document.getElementById('dtEpisodes');
+
+        // Settings
+        const INITIAL_LIMIT = 5;
+        dtEpisodes.innerHTML = '';
+
+        if (!episodes || episodes.length === 0) {
+          dtEpisodes.innerHTML = '<div style="color:var(--text-muted)">No episodes found.</div>';
+          return;
+        }
+
+        // --- CARD CREATOR ---
+        const createCard = (ep, index) => {
+          const imgUrl = ep.still_path ? POSTER_BASE + ep.still_path : '';
+          const imgHtml = imgUrl
+            ? `<img class="episode-img" src="${imgUrl}" loading="lazy" alt="${ep.name}">`
+            : `<div class="episode-img" style="display:flex;align-items:center;justify-content:center;background:#1a1a1a;color:#555;">No Image</div>`;
+
+          const div = document.createElement('div');
+          div.className = 'episode-card';
+
+          // Exact structure matching your CSS
+          div.innerHTML = `
+            ${imgHtml}
+            <div class="episode-info">
+              <h4 class="episode-title">${index + 1}. ${ep.name}</h4>
+              <div>${ep.air_date || 'Unknown'} • ${ep.runtime ? ep.runtime + 'm' : 'N/A'}</div>
+                  <p>${ep.overview || 'No description available.'}</p>
+              </div>
+            <i class="fas fa-play-circle" style="font-size:24px; color:var(--text-muted); flex-shrink:0;"></i>
+          `;
+
+          div.onclick = () => {
+            // Play specific episode
+            player.open(
+              { id: showId, name: showName }, // Media Object
+              seasonNumber,                   // Season
+              ep.episode_number               // Episode
+            );
+          };
+          return div;
+        };
+
+        // --- RENDER VISIBLE (First 5) ---
+        const initialBatch = episodes.slice(0, INITIAL_LIMIT);
+        initialBatch.forEach((ep, idx) => {
+          dtEpisodes.appendChild(createCard(ep, idx));
+        });
+
+        // --- RENDER HIDDEN (The Rest) ---
+        const remainingEpisodes = episodes.slice(INITIAL_LIMIT);
+
+        if (remainingEpisodes.length > 0) {
+          // Wrapper
+          const hiddenWrapper = document.createElement('div');
+          hiddenWrapper.className = 'hidden-episodes-wrapper';
+
+          remainingEpisodes.forEach((ep, idx) => {
+            hiddenWrapper.appendChild(createCard(ep, idx + INITIAL_LIMIT));
+          });
+
+          dtEpisodes.appendChild(hiddenWrapper);
+
+          // Button Container
+          const btnContainer = document.createElement('div');
+          btnContainer.className = 'load-more-row';
+
+          // Button
+          const btn = document.createElement('button');
+          btn.className = 'expand-episodes-btn';
+          btn.innerHTML = `Show ${remainingEpisodes.length} More Episodes <i class="fas fa-chevron-down"></i>`;
+
+          // Toggle Logic
+          btn.onclick = () => {
+            const isExpanded = btn.classList.contains('active');
+
+            if (isExpanded) {
+              // CLOSE
+              btn.classList.remove('active');
+              btn.innerHTML = `Show ${remainingEpisodes.length} More Episodes <i class="fas fa-chevron-down"></i>`;
+
+              gsap.to(hiddenWrapper, { height: 0, opacity: 0, duration: 0.5, ease: "power3.inOut" });
+
+            } else {
+              // OPEN
+              btn.classList.add('active');
+              btn.innerHTML = `Show Less <i class="fas fa-chevron-up"></i>`;
+
+              gsap.set(hiddenWrapper, { height: "auto" });
+              gsap.from(hiddenWrapper, { height: 0, duration: 0.5, ease: "power3.out" });
+              gsap.to(hiddenWrapper, { opacity: 1, duration: 0.5, delay: 0.1 });
+            }
+          };
+
+          btnContainer.appendChild(btn);
+          dtEpisodes.appendChild(btnContainer);
+        }
+
+        // Entry Animation
+        gsap.fromTo('.episode-card',
+          { y: 20, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.4, stagger: 0.05, ease: "power2.out" }
+        );
+      },
+
+
+      initNetworkView: async (params) => {
+        app.state.currentParams = params;
+        app.state.pages = { movie: 1, tv: 1 };
+        document.getElementById('netTitle').innerText = params.name;
+        document.getElementById('netMovieGrid').innerHTML = '';
+        document.getElementById('netTvGrid').innerHTML = '';
+        await Promise.all([app.loadMore('movie', true), app.loadMore('tv', true)]);
+      },
+
+      loadMore: async (type, reset = false) => {
+        const gridId = type === 'movie' ? 'netMovieGrid' : 'netTvGrid';
+        const btnId = type === 'movie' ? 'loadMoreMovieBtn' : 'loadMoreTvBtn';
+        const grid = document.getElementById(gridId);
+        const btn = document.getElementById(btnId);
+        const p = app.state.currentParams;
+        let endpoint = '/discover/' + type;
+        let queryParams = { page: app.state.pages[type], watch_region: 'US' };
+        if (p.type === 'genre') {
+          let genreId = p.id;
+          if (type === 'tv' && GENRE_MAP[p.id]) genreId = GENRE_MAP[p.id];
+          if (type === 'tv' && !GENRE_MAP[p.id] && p.id !== 10759 && p.id !== 10765) queryParams.sort_by = 'popularity.desc';
+          else queryParams.with_genres = genreId;
+        } else if (p.type === 'provider') queryParams.with_watch_providers = p.id;
+        const res = await api.get(endpoint, queryParams);
+        if (!res.results || res.results.length === 0) {
+          if (reset) document.getElementById(type === 'movie' ? 'netMovieSection' : 'netTvSection').style.display = 'none';
+          btn.style.display = 'none';
+          return;
+        }
+        document.getElementById(type === 'movie' ? 'netMovieSection' : 'netTvSection').style.display = 'block';
+        const frag = document.createDocumentFragment();
+        const newCards = [];
+        res.results.forEach(m => {
+          const c = ui.card(m, type);
+          if (c) { frag.appendChild(c); newCards.push(c); }
+        });
+        grid.appendChild(frag);
+        if (newCards.length) gsap.fromTo(newCards, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, stagger: 0.05, clearProps: 'all' });
+        if (res.page < res.total_pages) { btn.style.display = 'block'; app.state.pages[type]++; } else { btn.style.display = 'none'; }
+      },
+
+      /*toggleWatchlist: (m) => {
+        const idx = app.state.watchlist.findIndex(i => i.id === m.id);
+        if (idx > -1) app.state.watchlist.splice(idx, 1);
+        else { if (!m.media_type) m.media_type = m.title ? 'movie' : 'tv'; app.state.watchlist.push(m); }
+        localStorage.setItem('aether_wl', JSON.stringify(app.state.watchlist));
+        const btns = ['heroListBtn', 'dtListBtn'];
+        btns.forEach(id => { const el = document.getElementById(id); if (el && document.body.contains(el)) app.updateListBtn(el, m.id); });
+      },*/
+
+      toggleWatchlist: async (m) => {
+        const idx = app.state.watchlist.findIndex(i => i.id === m.id);
+
+        // Ensure media type is set
+        if (!m.media_type) m.media_type = m.title ? 'movie' : 'tv';
+
+        if (idx > -1) {
+          // REMOVE
+          const itemToRemove = app.state.watchlist[idx]; // Need exact ref for local logic
+          app.state.watchlist.splice(idx, 1);
+
+          // Cloud Sync
+          if (app.state.user) {
+            await removeFromCloudList(app.state.user, itemToRemove);
+          }
+        } else {
+          // ADD
+          app.state.watchlist.push(m);
+
+          // Cloud Sync
+          if (app.state.user) {
+            // Firebase doesn't like complex objects with undefined values sometimes,
+            // so we create a clean object to save.
+            const cleanMovie = {
+              id: m.id,
+              title: m.title || m.name,
+              poster_path: m.poster_path || null,
+              backdrop_path: m.backdrop_path || null,
+              media_type: m.media_type,
+
+              release_date: m.release_date || m.first_air_date || '',
+              vote_average: m.vote_average || 0,
+            };
+            await addToCloudList(app.state.user, cleanMovie);
+          }
+        }
+
+        // Local Backup (optional, good for offline)
+        localStorage.setItem('aether_wl', JSON.stringify(app.state.watchlist));
+
+        // Update Buttons
+        const btns = ['heroListBtn', 'dtListBtn'];
+        btns.forEach(id => {
+          const el = document.getElementById(id);
+          if (el && document.body.contains(el)) app.updateListBtn(el, m.id);
+        });
+
+        // If on watchlist page, re-render
+        if (document.getElementById('view-watchlist').classList.contains('active')) {
+          app.renderWatchlist();
+        }
+      },
+
+      updateListBtn: (btn, id) => {
+        const inList = app.state.watchlist.some(i => i.id === id);
+        btn.innerHTML = inList ? '<i class="fas fa-check"></i> Saved' : '<i class="fas fa-plus"></i> Add to List';
+        btn.style.color = inList ? 'var(--accent)' : '#fff';
+        btn.style.borderColor = inList ? 'var(--accent)' : 'rgba(255,255,255,0.1)';
+      },
+      renderWatchlist: () => {
+        const grid = document.getElementById('watchlistGrid');
+        grid.innerHTML = '';
+        if (!app.state.watchlist.length) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#666">Your list is empty</div>';
+        app.state.watchlist.forEach(m => { const c = ui.card(m, m.media_type); if (c) grid.appendChild(c); });
+        gsap.from(grid.children, { scale: 0.9, opacity: 0, stagger: 0.05 });
+      },
+
+      playVideo: async (id, type, titleData = '') => {
+        const modal = document.getElementById('videoModal');
+        const bg = document.querySelector('.modal-bg');
+        const wrapper = document.getElementById('videoWrapper');
+        const container = document.getElementById('videoContainer');
+        const loader = document.getElementById('videoLoader');
+        const header = document.querySelector('.video-header');
+        const closeBtn = document.querySelector('.close-video-btn');
+        const titleLabel = document.getElementById('videoTitleLabel');
+
+        const key = await api.findVideo(id, type);
+        if (!key) { return; }
+
+        let displayTitle = "Aether Original";
+        if (typeof titleData === 'string' && titleData !== '') displayTitle = titleData;
+        else if (app.state.currentMedia) displayTitle = app.state.currentMedia.title || app.state.currentMedia.name;
+        titleLabel.innerText = displayTitle;
+
+        container.innerHTML = '';
+        modal.classList.add('active');
+        loader.style.display = 'flex';
+        loader.style.opacity = 1;
+
+        const tl = gsap.timeline();
+        tl.to(modal, { autoAlpha: 1, duration: 0 })
+          .to(bg, { opacity: 1, duration: 0.4, ease: "power2.out" })
+          .fromTo(wrapper, { scale: 0.8, clipPath: "inset(0 50% 0 50%)", opacity: 0 }, { scale: 1, clipPath: "inset(0 0% 0 0%)", opacity: 1, duration: 0.8, ease: "expo.inOut" }, "-=0.2")
+          .fromTo([header, closeBtn], { y: -20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, stagger: 0.1, ease: "power2.out" }, "-=0.4");
+
+        setTimeout(() => {
+          container.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${key}?autoplay=1&rel=0&modestbranding=1&showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+          gsap.to(loader, { opacity: 0, duration: 0.5, onComplete: () => loader.style.display = 'none' });
+        }, 600);
+      },
+
+      closeVideo: () => {
+        const modal = document.getElementById('videoModal');
+        const bg = document.querySelector('.modal-bg');
+        const wrapper = document.getElementById('videoWrapper');
+        const header = document.querySelector('.video-header');
+        const closeBtn = document.querySelector('.close-video-btn');
+
+        const tl = gsap.timeline({
+          onComplete: () => {
+            modal.classList.remove('active');
+            document.getElementById('videoContainer').innerHTML = '';
+          }
+        });
+        tl.to([header, closeBtn], { opacity: 0, duration: 0.2 })
+          .to(wrapper, { clipPath: "inset(0 50% 0 50%)", scale: 0.9, opacity: 0, duration: 0.5, ease: "power3.inOut" })
+          .to(bg, { opacity: 0, duration: 0.3 }, "-=0.3");
+      },
+
+      toggleSearch: () => {
+        app.state.searchOpen = !app.state.searchOpen;
+        const overlay = document.getElementById('searchOverlay');
+        const input = document.getElementById('searchInput');
+        if (app.state.searchOpen) { overlay.classList.add('open'); setTimeout(() => input.focus(), 500); }
+        else { overlay.classList.remove('open'); input.blur(); }
+      },
+      handleSearch: async (e) => {
+        const query = e.target.value;
+        const container = document.getElementById('searchResults');
+        if (query.length < 2) { container.innerHTML = ''; return; }
+        const res = await api.get('/search/multi', { query });
+        container.innerHTML = '';
+        const valid = res.results.filter(i => i.media_type === 'movie' || i.media_type === 'tv');
+        valid.forEach(m => { const c = ui.card(m); if (c) container.appendChild(c); });
+      },
+      toggleMenu: () => {
+        app.state.menuOpen = !app.state.menuOpen;
+        const menu = document.getElementById('fsMenu');
+        const links = document.querySelectorAll('.fs-link');
+        if (app.state.menuOpen) {
+          menu.classList.add('active');
+          gsap.to(menu, { clipPath: 'circle(150% at 94% 5%)', duration: 0.8, ease: 'power3.inOut' });
+          gsap.to(links, { y: 0, opacity: 1, duration: 0.8, stagger: 0.05, delay: 0.2, ease: 'power4.out' });
+          gsap.to('.burger-line:nth-child(1)', { rotation: 45, y: 5 });
+          gsap.to('.burger-line:nth-child(2)', { rotation: -45, width: '100%', y: -5 });
+          document.querySelector('.menu-trigger span').style.color = '#000';
+        } else {
+          menu.classList.remove('active');
+          gsap.to(menu, { clipPath: 'circle(0% at 94% 5%)', duration: 0.6, ease: 'power3.inOut' });
+          gsap.to(links, { y: '100%' });
+          gsap.to('.burger-line:nth-child(1)', { rotation: 0, y: 0 });
+          gsap.to('.burger-line:nth-child(2)', { rotation: 0, width: '60%', y: 0 });
+          document.querySelector('.menu-trigger span').style.color = '#fff';
+        }
+      },
+      toggleSidebar: (force) => {
+        const sb = document.getElementById('genreSidebar');
+        app.state.sidebarOpen = force !== undefined ? force : !app.state.sidebarOpen;
+        if (app.state.sidebarOpen) {
+          gsap.to(sb, { x: 0, duration: 0.5, ease: 'power3.out' });
+          gsap.to('main', { filter: 'blur(5px) brightness(0.4)', duration: 0.5 });
+        } else {
+          gsap.to(sb, { x: '-102%', duration: 0.5, ease: 'power3.in' });
+          gsap.to('main', { filter: 'blur(0px) brightness(1)', duration: 0.5 });
+        }
+      },
+      enableDrag: (el) => {
+        let isDown = false; let startX; let scrollLeft;
+        el.addEventListener('mousedown', (e) => { isDown = true; el.style.cursor = 'grabbing'; startX = e.pageX - el.offsetLeft; scrollLeft = el.scrollLeft; });
+        el.addEventListener('mouseleave', () => { isDown = false; el.style.cursor = 'grab'; });
+        el.addEventListener('mouseup', () => { isDown = false; el.style.cursor = 'grab'; });
+        el.addEventListener('mousemove', (e) => {
+          if (!isDown) return; e.preventDefault();
+          const x = e.pageX - el.offsetLeft; const walk = (x - startX) * 2;
+          el.scrollLeft = scrollLeft - walk;
+        });
+      },
+      profileClick: () => { app.go('settings'); },
+      switchSettingTab: (tabId, btnEl) => {
+        document.querySelectorAll('.set-tab').forEach(t => t.classList.remove('active'));
+        btnEl.classList.add('active');
+        const panels = document.querySelectorAll('.set-panel');
+        panels.forEach(p => {
+          if (p.classList.contains('active')) {
+            gsap.to(p, { opacity: 0, y: -10, duration: 0.2, onComplete: () => { p.classList.remove('active'); p.style.display = 'none'; } });
+          }
+        });
+        setTimeout(() => {
+          const target = document.getElementById(`set-${tabId}`);
+          target.style.display = 'block';
+          target.classList.add('active');
+          gsap.fromTo(target, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" });
+        }, 250);
+      }
+    };
+
+    // Avatar Physics (External)
+    const initAvatar = () => {
+      const wrap = document.querySelector('.profile-wrapper');
+      const inner = document.querySelector('.profile-inner');
+      const img = document.querySelector('.profile-img');
+      const glow = document.querySelector('.profile-glow');
+      wrap.addEventListener('mousemove', (e) => {
+        const rect = wrap.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        gsap.to(wrap, { x: x * 0.4, y: y * 0.4, rotation: x * 0.5, duration: 0.3, ease: 'power2.out' });
+        gsap.to(img, { x: -x * 0.3, y: -y * 0.3, duration: 0.3, ease: 'power2.out' });
+        gsap.to(glow, { x: x, y: y, scale: 1, opacity: 0.6, duration: 0.3 });
+      });
+      wrap.addEventListener('mouseleave', () => {
+        gsap.to([wrap, img], { x: 0, y: 0, rotation: 0, duration: 0.8, ease: 'elastic.out(1, 0.4)' });
+        gsap.to(glow, { scale: 0, opacity: 0, duration: 0.3, x: '-50%', y: '-50%' });
+      });
+      wrap.addEventListener('mousedown', () => {
+        gsap.to(inner, { scale: 0.9, duration: 0.1, ease: 'power2.out', onComplete: () => { gsap.to(inner, { scale: 1, duration: 0.4, ease: 'elastic.out(1, 0.3)' }); } });
+      });
+    };
+
+    const createCard = (ep, index) => {
+      const imgUrl = ep.still_path ? POSTER_BASE + ep.still_path : '';
+      // Use a placeholder if no image
+      const imgHtml = imgUrl
+        ? `<img class="episode-img" src="${imgUrl}" loading="lazy" alt="${ep.name}">`
+        : `<div class="episode-img" style="display:flex;align-items:center;justify-content:center;background:#1a1a1a;color:#555;width:100%;height:100%;"><i class="fas fa-image" style="font-size:24px;"></i></div>`;
+
+      const div = document.createElement('div');
+      div.className = 'episode-card';
+
+      // Updated HTML Structure
+      div.innerHTML = `
+      <div class="episode-img-wrap">
+        ${imgHtml}
+      </div>
+      
+      <div class="episode-info">
+        <h4 class="episode-title">${index + 1}. ${ep.name}</h4>
+        <div class="episode-meta">
+          <span>${ep.air_date ? ep.air_date.split('-')[0] : ''}</span>
+          ${ep.runtime ? `<span>• ${ep.runtime}m</span>` : ''}
+        </div>
+        <p class="episode-desc">${ep.overview || 'No overview available for this episode.'}</p>
+      </div>
+
+      <div class="episode-play">
+        <i class="fas fa-play" style="font-size: 14px; margin-left: 2px;"></i>
+      </div>
+    `;
+
+      div.onclick = () => app.playVideo(showId, 'tv', `${showName}: S${seasonNumber} E${ep.episode_number} - ${ep.name}`);
+      return div;
+    };
+
+
+    // Attach to window so HTML clicks work
+    window.app = app;
+
+    // Initialize
+    app.init();
+  </script>
+
+</body>
+
+</html>

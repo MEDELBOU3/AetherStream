@@ -1,0 +1,42 @@
+@media (max-width: 1024px) {
+  .spotlight-grid { grid-template-columns: 1fr; }
+  .spotlight-col-left { border-right: none; border-bottom: 1px solid var(--border); flex-direction: row; text-align: left; gap: 40px; padding: 40px; }
+  .poster-frame { margin-bottom: 0; width: 160px; }
+  .spotlight-title { font-size: 2.5rem; }
+  .spotlight-actions-left { justify-content: flex-start; }
+}
+
+@media (max-width: 900px) {
+  .detail-inner { grid-template-columns: 1fr; margin-top: 25vh; }
+  .detail-poster { width: 200px; margin: 0 auto; display: block; }
+  .detail-info { text-align: center; }
+  .detail-meta { justify-content: center; }
+  .card { flex: 0 0 150px; }
+  .media-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .fs-link { font-size: 3.5rem; }
+  .provider-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .episode-list, .load-more-row { max-width: 100%; }
+}
+
+@media (max-width: 800px) {
+  .settings-layout { grid-template-columns: 1fr; gap: 40px; }
+  .settings-sidebar { border-right: none; padding-right: 0; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+  .settings-nav { flex-direction: row; overflow-x: auto; padding-bottom: 10px; }
+  .set-tab { white-space: nowrap; }
+}
+
+@media (max-width: 768px) {
+  .spotlight-col-left { flex-direction: column; text-align: center; }
+  .spotlight-actions-left { justify-content: center; }
+  .spotlight-details { grid-template-columns: 1fr; }
+  .main-desc { border-right: none; border-bottom: 1px solid var(--border); }
+  .spotlight-scene-wrap { height: 250px; }
+  .video-wrapper { width: 100vw; height: 100vh; border-radius: 0; max-width: none; }
+  #videoTitleLabel { font-size: 1.5rem; }
+  .close-video-btn { top: 20px; right: 20px; }
+}
+
+@media (max-width: 600px) {
+  .episode-card { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .episode-img { width: 100%; }
+}

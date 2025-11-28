@@ -1,0 +1,49 @@
+:root {
+  /* --- DARK THEME (DEFAULT) --- */
+  --bg: #050505;
+  --surface: #111111;
+  --surface-2: #1a1a1a;
+  --surface-glass: rgba(20, 20, 20, 0.7);
+  --nav-bg: rgba(5, 5, 5, 0.85);
+
+  --accent: #E50914;
+  --text: #ffffff;
+  --text-muted: #9ca3af;
+  --border: rgba(255, 255, 255, 0.1);
+
+  --input-bg: #111;
+  --card-hover-shadow: rgba(0, 0, 0, 0.6);
+  --btn-primary-bg: #fff;
+  --btn-primary-text: #000;
+
+  --nav-height: 90px;
+  --sidebar-width: 340px;
+  
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --theme-transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+  
+  --spotlight-bg-img: url('https://media.themoviedb.org/t/p/w1000_and_h563_face/askFH4GSk2u9z3ZE5ypdKIMeqLJ.jpg');
+  --spotlight-gradient: linear-gradient(to bottom right, rgba(0, 0, 0, 0.80), rgba(0, 0, 0, 0.35));
+}
+
+/* --- LIGHT THEME OVERRIDES --- */
+[data-theme="light"] {
+  --bg: #f3f4f6;
+  --surface: #ffffff;
+  --surface-2: #e5e7eb;
+  --surface-glass: rgba(255, 255, 255, 0.85);
+  --nav-bg: rgba(255, 255, 255, 0.9);
+
+  --accent: #D81F26;
+  --text: #111827;
+  --text-muted: #6b7280;
+  --border: rgba(0, 0, 0, 0.15);
+
+  --input-bg: #ffffff;
+  --card-hover-shadow: rgba(0, 0, 0, 0.15);
+  --btn-primary-bg: #000;
+  --btn-primary-text: #fff;
+
+  --spotlight-gradient: linear-gradient(to bottom right, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.30));
+}

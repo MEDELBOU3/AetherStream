@@ -1,0 +1,52 @@
+{
+  "name": "aetherstream",
+  "version": "1.0.0",
+  "description": "AetherStream — Ultimate Provider Edition Desktop App",
+  "main": "main.js",
+  "homepage": "./",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron-reloader . & electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux"
+  },
+  "build": {
+    "appId": "com.aetherstream.app",
+    "productName": "AetherStream",
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "css/",
+      "js/",
+      "node_modules/"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "certificateFile": null,
+      "certificatePassword": null
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  },
+  "devDependencies": {
+    "electron": "latest",
+    "electron-builder": "latest",
+    "electron-reloader": "latest"
+  },
+  "dependencies": {
+    "firebase": "latest"
+  }
+}
