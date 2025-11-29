@@ -1,6 +1,5 @@
 const { app, BrowserWindow, Menu, ipcMain } = require('electron');
 const path = require('path');
-const isDev = require('electron-is-dev');
 
 let mainWindow;
 
@@ -21,15 +20,15 @@ function createWindow() {
     icon: path.join(__dirname, 'assets/aetherStream.png')
   });
 
-  // Load the app
-  const startURL = isDev 
-    ? 'http://localhost:3000' 
-    : `file://${path.join(__dirname, '../build/index.html')}`;
-  
+  // Load the app - always load index.html from current directory
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
 
   // DevTools hidden by default (development only)
   // Uncomment to enable: mainWindow.webContents.openDevTools();
+  
+  mainWindow.webContents.on('did-fail-load', () => {
+    console.error('Failed to load index.html');
+  });
 
   mainWindow.on('closed', () => {
     mainWindow = null;
@@ -93,4 +92,10 @@ ipcMain.on('app-version', (event) => {
 // Handle any uncaught exceptions
 process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);
+});
+
+// Log all errors in the main process
+app.on('ready', () => {
+  console.log('App is ready');
+  console.log('App path:', app.getAppPath());
 });
