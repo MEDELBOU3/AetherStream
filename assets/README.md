@@ -1,10 +1,10 @@
 # AetherStream Brand Assets
 
-![Image 1](image1.jpg)
+![Image 1](assets/Ui1.png)
 
-![Image 2](image2.jpg)
+![Image 2](assets/Ui2.png)
 
-![Image 3](image3.jpg)
+![Image 3](assets/Ui3.png)
 
 This folder contains the branding and icon files for the AetherStream application.
 
