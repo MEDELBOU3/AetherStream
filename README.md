@@ -2,6 +2,14 @@
 
 A desktop application built with Electron.
 
+![Image 1](assets/Ui1.png)
+
+![Image 2](assets/Ui2.png)
+
+![Image 3](assets/Ui3.png)
+
+
+
 ## Installation
 
 1. Install dependencies:
