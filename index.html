@@ -12,12 +12,14 @@
     href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href='https://cdn.boxicons.com/3.0.6/fonts/basic/boxicons.min.css' rel='stylesheet'>
 
   <!-- GSAP Suite -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
+
 
   <link rel="stylesheet" href="css/main.css">
 </head>
@@ -58,6 +60,79 @@
     </div>
   </div>
 
+  <!-- EDIT PROFILE MODAL -->
+  <div class="video-modal" id="editProfileModal" style="z-index: 6000;">
+    <div class="modal-bg" onclick="socialUI.closeEditModal()"></div>
+
+    <div class="auth-card edit-card"
+      style="width:400px; max-width:90%; background:var(--surface-glass); backdrop-filter:blur(20px); border:1px solid var(--border); border-radius:20px; padding:30px; position:relative;">
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 style="margin:0; font-family:'Playfair Display';">Edit Profile</h2>
+        <div onclick="socialUI.closeEditModal()" style="cursor:pointer; font-size:20px;">✕</div>
+      </div>
+
+      <div class="setting-group">
+        <div class="input-label">Display Name</div>
+        <input type="text" id="editDisplayName" class="cyber-input" maxlength="20">
+      </div>
+
+      <div class="setting-group">
+        <div class="input-label">Bio</div>
+        <textarea id="editBio" class="cyber-input" rows="4" maxlength="150" style="resize:none;"></textarea>
+        <div style="text-align:right; font-size:11px; color:gray; margin-top:5px;" id="bioCharCount">0/150</div>
+      </div>
+
+      <button class="btn btn-primary" id="saveProfileBtn" onclick="socialUI.saveProfileChanges()"
+        style="width:100%; justify-content:center;">
+        Save Changes
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ADD PROFILE MODAL -->
+  <div class="video-modal" id="addProfileModal" style="z-index: 10000;">
+    <div class="modal-bg" onclick="profileGateUI.closeAddModal()"></div>
+
+    <div class="auth-card"
+      style="width:400px; max-width:90%; background:var(--surface-glass); backdrop-filter:blur(20px); border:1px solid var(--border); border-radius:20px; padding:30px; position:relative;">
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 style="margin:0; font-family:'Playfair Display';">New Profile</h2>
+        <div onclick="profileGateUI.closeAddModal()" style="cursor:pointer; font-size:20px;">✕</div>
+      </div>
+
+      <!-- Avatar Preview -->
+      <div style="text-align:center; margin-bottom:20px;">
+        <img id="newProfileAvatarPreview" src="https://i.pinimg.com/736x/ff/a6/42/ffa6421da8b8b6b345f26bc1f8a90139.jpg"
+          style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:2px solid var(--border);">
+      </div>
+
+      <div class="setting-group">
+        <div class="input-label">Profile Name</div>
+        <input type="text" id="newProfileName" class="cyber-input" placeholder="Name" maxlength="15">
+      </div>
+
+      <!-- Kid Toggle -->
+      <div class="setting-group"
+        style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:15px; border-radius:10px;">
+        <div>
+          <div class="input-label" style="margin:0; color:#fff;">Kids Profile</div>
+          <div style="font-size:11px; color:gray;">Curated content only (PG/G)</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="newProfileIsKids" onchange="profileGateUI.toggleNewProfileMode()">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <button class="btn btn-primary" onclick="profileGateUI.submitNewProfile()"
+        style="width:100%; justify-content:center; margin-top:20px;">
+        Create Profile
+      </button>
+    </div>
+  </div>
 
   <!-- SEARCH OVERLAY -->
   <div class="search-overlay" id="searchOverlay">
@@ -87,11 +162,29 @@
     </div>
   </div>
 
+  <!-- PROFILE GATE (Who is watching?) -->
+  <section id="profileGateView" class="profile-gate">
+    <div class="gate-content">
+      <h1 class="gate-title">Who's watching?</h1>
+      <div class="gate-grid" id="profileGateGrid">
+      </div>
+      <button class="gate-manage-btn" id="manageProfilesBtn" onclick="profileGateUI.toggleManageMode()">
+        Manage Profiles
+      </button>
+    </div>
+  </section>
+
   <!-- NAVBAR -->
   <nav class="navbar" id="navbar">
     <div class="brand" onclick="app.go('home')">AETHER<span>.</span></div>
 
     <div class="nav-actions">
+      <div class="nav-icon magnetic" onclick="missionUI.open()" title="Challenges & XP">
+        <i class="fas fa-trophy" style="color: gold;"></i>
+      </div>
+      <div class="nav-icon magnetic" onclick="oracleUI.open()" title="Mood Matcher">
+        <i class='bx  bx-sparkles' style="color:var(--accent);"></i>
+      </div>
       <div class="nav-icon magnetic" onclick="app.toggleSearch()"><i class="fas fa-search"></i></div>
       <div class="profile-wrapper magnetic-avatar" onclick="app.profileClick()">
         <!-- The glowing ring behind -->
@@ -131,11 +224,55 @@
 
   <!-- GENRE SIDEBAR -->
   <aside class="genre-sidebar" id="genreSidebar">
-    <div style="margin-bottom:30px; opacity:0.5; font-size:12px; letter-spacing:2px; text-transform:uppercase;">
-      Categories</div>
-    <div class="genre-list" id="genreList"></div>
-    <button style="position:absolute; top:30px; right:30px; font-size:24px; color:#fff;"
-      onclick="app.toggleSidebar(false)">✕</button>
+
+    <!-- 1. Header -->
+    <div class="sidebar-header">
+      <h2 class="sidebar-logo">Aether<span>.</span></h2>
+      <button class="close-sidebar-btn" onclick="app.toggleSidebar(false)">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- 2. Scrollable Area -->
+    <div class="sidebar-scroll-area">
+
+      <!-- A. Search -->
+      <div class="sidebar-search-wrap">
+        <i class="fas fa-search"></i>
+        <input type="text" id="genreFilterInput" placeholder="Find pages..." autocomplete="off">
+      </div>
+
+      <!-- B. Quick History (New Feature) -->
+      <div id="sidebarHistorySection" style="display:none;">
+        <div class="sidebar-section-title">Continue Watching</div>
+        <div class="sidebar-history-list" id="sidebarHistoryList">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- C. Discover Links -->
+      <div class="sidebar-section-title">Discover</div>
+      <div class="nav-list" id="discoverList"></div>
+
+      <!-- D. Genre Tags (Visual Update) -->
+      <div class="sidebar-section-title">Browse Categories</div>
+      <div class="genre-cloud" id="genreList"></div>
+    </div>
+
+    <!-- 3. Sticky Footer (User) -->
+    <div class="sidebar-footer">
+      <div class="footer-user" onclick="app.go('profile')">
+        <img id="sidebarAvatar" src="" alt="User">
+        <div class="footer-info">
+          <span id="sidebarName">Guest</span>
+          <small>View Profile</small>
+        </div>
+      </div>
+      <button class="footer-settings-btn" onclick="app.go('settings')">
+        <i class="fas fa-cog"></i>
+      </button>
+    </div>
+
   </aside>
 
   <!-- CLOSE BUTTON FOR SUB-VIEWS -->
@@ -254,6 +391,11 @@
       <div class="stroke-layer layer-3">>> >> >>> >> >>></div>
     </div>
     <div id="homeRows" style="position:relative; z-index:5; "></div>
+
+  </main>
+
+
+
   </main>
 
   <!-- VIEW: DETAIL -->
@@ -269,11 +411,29 @@
           <span id="dtYear">2023</span> • <span id="dtRating" style="color:var(--accent)">98% Match</span> • <span
             id="dtRuntime">2h 10m</span>
         </div>
+        <div class="user-rating-box">
+          <span class="rating-label">Your Rating:</span>
+          <div class="star-group" id="dtUserRating">
+            <i class="fas fa-star star-btn" data-val="1"></i>
+            <i class="fas fa-star star-btn" data-val="2"></i>
+            <i class="fas fa-star star-btn" data-val="3"></i>
+            <i class="fas fa-star star-btn" data-val="4"></i>
+            <i class="fas fa-star star-btn" data-val="5"></i>
+          </div>
+        </div>
         <p id="dtDesc" class="detail-desc">Loading...</p>
 
-        <div style="display:flex; gap:16px; margin-bottom:50px;">
-          <button class="btn btn-primary magnetic" id="dtPlayBtn"><i class="fas fa-play"></i> Play Trailer</button>
-          <button class="btn btn-blur magnetic" id="dtListBtn"><i class="fas fa-plus"></i> Add to List</button>
+        <div style="display:flex; align-items:center; gap:16px; margin-bottom:50px;">
+          <button class="btn btn-primary magnetic" id="dtPlayBtn"><i class="fas fa-play"></i> Trailer</button>
+
+          <!-- Inserted Stream Button will go here via JS -->
+
+          <button class="btn btn-blur magnetic" id="dtListBtn"><i class="fas fa-plus"></i> List</button>
+
+          <!-- NEW: FAVORITE BUTTON -->
+          <button class="btn-icon magnetic" id="dtFavBtn" title="Add to Favorites">
+            <i class="fas fa-heart"></i>
+          </button>
         </div>
 
         <div id="seasonContainer" style="display:none;">
@@ -358,89 +518,130 @@
 
       <!-- Content Area -->
       <div class="settings-content">
-
         <!-- TAB: GENERAL -->
         <div id="set-general" class="set-panel active">
           <h2 class="panel-title">Profile & Account</h2>
 
+          <!-- CURRENT PROFILE HEADER -->
           <div class="setting-group">
             <div class="profile-header">
-              <!-- Avatar Image -->
               <div class="avatar-large">
-                <!-- We added a specific ID here (optional) but the JS targets the class -->
-                <img src="https://mir-s3-cdn-cf.behance.net/project_modules/disp/84c20033850498.56ba69ac290ea.png">
+                <img src="" id="settingsAvatar" class="profile-img">
               </div>
               <div style="flex: 1;">
                 <div class="input-label">Display Name</div>
-                <!-- ADDED ID="settingsName" -->
                 <input type="text" id="settingsName" class="cyber-input" value="Loading..." spellcheck="false">
               </div>
             </div>
+          </div>
 
-            <!-- APPEARANCE SECTION -->
-            <div class="setting-group"
-              style="border-top: 1px solid var(--border); padding-top: 30px; margin-top: 30px;">
-              <h3
-                style="font-size:14px; text-transform:uppercase; letter-spacing:1px; margin-bottom:20px; color:var(--text-muted);">
-                Appearance</h3>
+          <!-- NEW: SWITCH PROFILE CONTAINER -->
+          <div class="setting-group" style="border-top: 1px solid var(--border); padding-top: 30px; margin-top: 30px;">
+            <h3
+              style="font-size:14px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-bottom:15px;">
+              Switch Profile
+            </h3>
 
-              <div class="control-row">
-                <div class="control-info">
-                  <div class="control-head">Dark Mode</div>
-                  <div class="control-sub" id="themeLabel">Switch between light and dark themes</div>
-                </div>
-                <label class="toggle-switch">
-                  <input type="checkbox" id="themeToggle" onchange="app.toggleTheme()">
-                  <span class="slider"></span>
-                </label>
-              </div>
+            <!-- This is where the JS injects the profiles -->
+            <div class="profiles-list-row" id="settingsProfilesList" style="display:flex; gap:10px; overflow-x:auto;">
             </div>
           </div>
 
-          <!-- Avatar Selection -->
           <div class="setting-group" style="border-top: 1px solid var(--border); padding-top: 30px; margin-top: 30px;">
             <h3
               style="font-size:14px; text-transform:uppercase; letter-spacing:1px; margin-bottom:20px; color:var(--text-muted);">
-              Choose Avatar
+              Content Safety
             </h3>
 
-            <!-- Added ID 'avatarGrid' -->
-            <div class="avatar-selection-grid" id="avatarGrid">
-              <div class="avatar-item selected" onclick="app.selectAvatar(this)">
-                <img src="https://mir-s3-cdn-cf.behance.net/project_modules/disp/84c20033850498.56ba69ac290ea.png"
-                  alt="Avatar 1">
+            <div class="control-row">
+              <div class="control-info">
+                <div class="control-head">Strict Safety Filter</div>
+                <div class="control-sub">Block sensitive keywords and show warning warnings. (Always ON for Kids)</div>
               </div>
-              <div class="avatar-item" onclick="app.selectAvatar(this)">
-                <img src="https://i.pinimg.com/736x/ff/a6/42/ffa6421da8b8b6b345f26bc1f8a90139.jpg" alt="Avatar 2">
-              </div>
-              <div class="avatar-item" onclick="app.selectAvatar(this)">
-                <img src="https://i.pinimg.com/736x/fd/a7/9a/fda79a9471d43a39d2d8eabc8720f8aa.jpg" alt="Avatar 3">
-              </div>
-              <div class="avatar-item" onclick="app.selectAvatar(this)">
-                <img src="https://i.pinimg.com/1200x/8b/c4/ba/8bc4babefe6475305f198f37a282f810.jpg" alt="Avatar 4">
-              </div>
-              <div class="avatar-item" onclick="app.selectAvatar(this)">
-                <img src="https://i.pinimg.com/736x/13/fb/2d/13fb2d9277d1ac839cbc29271d80d43e.jpg" alt="Avatar 5">
-              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="settingSafetyFilter" onchange="app.toggleAdultSafety()">
+                <span class="slider"></span>
+              </label>
             </div>
           </div>
 
+          <!-- APPEARANCE -->
+          <div class="setting-group" style="border-top: 1px solid var(--border); padding-top: 30px; margin-top: 30px;">
+            <!-- ... (Keep your Appearance/Dark Mode HTML here) ... -->
+            <h3
+              style="font-size:14px; text-transform:uppercase; letter-spacing:1px; margin-bottom:20px; color:var(--text-muted);">
+              Appearance</h3>
+            <div class="control-row">
+              <div class="control-info">
+                <div class="control-head">Dark Mode</div>
+              </div>
+              <label class="toggle-switch"><input type="checkbox" id="themeToggle" onchange="app.toggleTheme()"><span
+                  class="slider"></span></label>
+            </div>
+          </div>
 
+          <!-- AVATAR SELECTION (For Current Profile) -->
+          <div class="setting-group" style="border-top: 1px solid var(--border); padding-top: 30px; margin-top: 30px;">
+            <h3
+              style="font-size:14px; text-transform:uppercase; letter-spacing:1px; margin-bottom:20px; color:var(--text-muted);">
+              Change Avatar
+            </h3>
+            <div class="avatar-selection-grid" id="avatarGrid">
+              <!-- ... (Keep your existing avatars) ... -->
+              <div class="avatar-item" onclick="app.selectAvatar(this)"><img
+                  src="https://mir-s3-cdn-cf.behance.net/project_modules/disp/84c20033850498.56ba69ac290ea.png"></div>
+              <div class="avatar-item" onclick="app.selectAvatar(this)"><img
+                  src="https://i.pinimg.com/736x/ff/a6/42/ffa6421da8b8b6b345f26bc1f8a90139.jpg"></div>
+              <div class="avatar-item" onclick="app.selectAvatar(this)"><img
+                  src="https://i.pinimg.com/736x/fd/a7/9a/fda79a9471d43a39d2d8eabc8720f8aa.jpg"></div>
+              <div class="avatar-item" onclick="app.selectAvatar(this)"><img
+                  src="https://i.pinimg.com/1200x/8b/c4/ba/8bc4babefe6475305f198f37a282f810.jpg"></div>
+              <div class="avatar-item" onclick="app.selectAvatar(this)"><img
+                  src="https://i.pinimg.com/736x/13/fb/2d/13fb2d9277d1ac839cbc29271d80d43e.jpg"></div>
+              <div class="avatar-item" onclick="app.selectAvatar(this)"><img
+                  src="https://videos.openai.com/az/vg-assets/task_01kc9rwydqfce8wwdwksbyesqs%2F1765559740_img_1.webp?se=2025-12-14T00%3A00%3A00Z&sp=r&sv=2024-08-04&sr=b&skoid=cfbc986b-d2bc-4088-8b71-4f962129715b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-12-12T01%3A09%3A13Z&ske=2025-12-19T01%3A14%3A13Z&sks=b&skv=2024-08-04&sig=JYj0vGPCNOJbqjN/CHT8W/FNOPPQly08iRifsTFGZDc%3D&ac=oaivgprodscus2">
+              </div>
+              <div class="avatar-item" onclick="app.selectAvatar(this)"><img
+                  src="https://videos.openai.com/az/vg-assets/task_01kc9rwydqfce8wwdwksbyesqs%2F1765559740_img_0.webp?se=2025-12-14T00%3A00%3A00Z&sp=r&sv=2024-08-04&sr=b&skoid=cfbc986b-d2bc-4088-8b71-4f962129715b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-12-12T01%3A09%3A13Z&ske=2025-12-19T01%3A14%3A13Z&sks=b&skv=2024-08-04&sig=irNV/cq0VT1tpBlDp17jC1/i2L5zLaEHvHjM/JMyd1Y%3D&ac=oaivgprodscus2">
+              </div>
+              <div class="avatar-item" onclick="app.selectAvatar(this)">
+                <img
+                  src="https://videos.openai.com/az/vg-assets/task_01kc9rqbaqfqqtb3k6hv82q51e%2F1765559560_img_0.webp?se=2025-12-14T00%3A00%3A00Z&sp=r&sv=2024-08-04&sr=b&skoid=cfbc986b-d2bc-4088-8b71-4f962129715b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-12-12T01%3A09%3A13Z&ske=2025-12-19T01%3A14%3A13Z&sks=b&skv=2024-08-04&sig=P3jT%2BTQa0LsphIqgshAu208FZ6JW83ndoUXim27Jhlg%3D&ac=oaivgprodscus2"
+                  alt="">
+              </div>
+              <div class="avatar-item" onclick="app.selectAvatar(this)">
+                <img
+                  src="https://videos.openai.com/az/vg-assets/task_01kc9s8sx3emj8bdpdxgqk4fnn%2F1765560130_img_0.webp?se=2025-12-14T00%3A00%3A00Z&sp=r&sv=2024-08-04&sr=b&skoid=cfbc986b-d2bc-4088-8b71-4f962129715b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-12-12T01%3A09%3A13Z&ske=2025-12-19T01%3A14%3A13Z&sks=b&skv=2024-08-04&sig=4iyWolZMaGNdD4HO52cxbnRuDeieQWADyc%2BjD7TnkZs%3D&ac=oaivgprodscus2"
+                  alt="">
+              </div>
+              <div class="avatar-item" onclick="app.selectAvatar(this)">
+                <img
+                  src="https://videos.openai.com/az/vg-assets/task_01kc9s8sx3emj8bdpdxgqk4fnn%2F1765560130_img_1.webp?se=2025-12-14T00%3A00%3A00Z&sp=r&sv=2024-08-04&sr=b&skoid=cfbc986b-d2bc-4088-8b71-4f962129715b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-12-12T01%3A09%3A13Z&ske=2025-12-19T01%3A14%3A13Z&sks=b&skv=2024-08-04&sig=qlJ2j7Vj6dOJ06FiTJm8und/TN5lG9Len8T7pyYcY7A%3D&ac=oaivgprodscus2"
+                  alt="">
+              </div>
+              <div class="avatar-item" onclick="app.selectAvatar(this)">
+                <img
+                  src="https://videos.openai.com/az/vg-assets/task_01kc9te8eyfazr4vyxqann1y4x%2F1765561364_img_1.webp?se=2025-12-14T00%3A00%3A00Z&sp=r&sv=2024-08-04&sr=b&skoid=cfbc986b-d2bc-4088-8b71-4f962129715b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-12-12T01%3A09%3A13Z&ske=2025-12-19T01%3A14%3A13Z&sks=b&skv=2024-08-04&sig=cJsrlsAgyagMMG4cY8wE64QWHCSgipBACX4XgUjjiCc%3D&ac=oaivgprodscus2"
+                  alt="">
+              </div>
+              <div class="avatar-item" onclick="app.selectAvatar(this)">
+                <img
+                  src="https://videos.openai.com/az/vg-assets/task_01kc9sn03pes1vgb83tmf3ne6j%2F1765560532_img_0.webp?se=2025-12-14T00%3A00%3A00Z&sp=r&sv=2024-08-04&sr=b&skoid=cfbc986b-d2bc-4088-8b71-4f962129715b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-12-12T01%3A09%3A13Z&ske=2025-12-19T01%3A14%3A13Z&sks=b&skv=2024-08-04&sig=2A3/Cu6kTgxxBtFcxTZvLMfMlBUkkzFxpMa9pRH7%2BbM%3D&ac=oaivgprodscus2"
+                  alt="">
+              </div>
+              <div class="avatar-item" onclick="app.selectAvatar(this)">
+                <img
+                  src="https://videos.openai.com/az/vg-assets/task_01kc9sn03pes1vgb83tmf3ne6j%2F1765560532_img_1.webp?se=2025-12-14T00%3A00%3A00Z&sp=r&sv=2024-08-04&sr=b&skoid=cfbc986b-d2bc-4088-8b71-4f962129715b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-12-12T01%3A09%3A13Z&ske=2025-12-19T01%3A14%3A13Z&sks=b&skv=2024-08-04&sig=zlhxzpDVv8q2uaKpYXHZwlErHxunOr7io5unWz8JX7A%3D&ac=oaivgprodscus2"
+                  alt="">
+              </div>
 
-
-          <div class="setting-group">
-            <div class="input-label">Email Address</div>
-            <!-- ADDED ID="settingsEmail" -->
-            <input type="email" id="settingsEmail" class="cyber-input" value="..." readonly
-              style="opacity:0.5; cursor:not-allowed;">
+            </div>
           </div>
 
           <div class="setting-group" style="margin-top:40px;">
-            <!-- ADDED ONCLICK="app.signOut()" -->
             <button class="btn btn-blur" onclick="app.signOut()"
-              style="width:100%; justify-content:center; border-color:var(--accent); color:var(--accent);">
-              Sign Out
-            </button>
+              style="width:100%; justify-content:center; border-color:var(--accent); color:var(--accent);">Sign
+              Out</button>
           </div>
         </div>
 
@@ -675,54 +876,604 @@
 
     <div class="profile-layout-advanced">
 
-      <!-- 2. ANALYTICS SIDEBAR -->
-      <div class="profile-stats-col">
-        <div class="stats-card">
-          <h3>Aether Stats</h3>
-          <div class="stat-grid">
-            <div class="stat-box">
-              <span class="val" id="statMovies">0</span>
-              <span class="lbl">Movies Saved</span>
+      <!-- 2. MAIN TABS -->
+      <div class="profile-main-col" style="grid-column: 1 / -1;">
+        <div class="profile-tabs"
+          style="display: flex; gap: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 30px; flex-wrap: wrap;">
+          <button class="tab-btn active" onclick="app.switchProfileTab('watchlist')"
+            style="padding: 10px 20px; cursor: pointer;">My Watchlist</button>
+          <button class="tab-btn" onclick="app.switchProfileTab('history')"
+            style="padding: 10px 20px; cursor: pointer;">Watch History</button>
+          <button class="tab-btn" onclick="app.switchProfileTab('social')"
+            style="padding: 10px 20px; cursor: pointer;">Social Network</button>
+          <button class="tab-btn" onclick="app.switchProfileTab('analytics')"
+            style="padding: 10px 20px; cursor: pointer;">Analytics</button>
+        </div>
+
+        <!-- TAB: WATCHLIST -->
+        <div id="tab-watchlist" class="profile-tab-content active">
+          <div class="grid-header">
+            <h1 class="grid-title">My Watchlist</h1>
+            <p style="color:#aaa; margin-top:10px;">Your personal library</p>
+          </div>
+          <div class="media-grid" id="userPageGrid">
+          </div>
+        </div>
+
+        <!-- TAB: WATCH HISTORY -->
+        <div id="tab-history" class="profile-tab-content" style="display:none;">
+          <div class="grid-header">
+            <h1 class="grid-title">Watch History</h1>
+            <p style="color:#aaa; margin-top:10px;">Your personal library</p>
+          </div>
+          <div class="media-grid" id="userHistoryGrid"></div>
+        </div>
+
+        <!-- TAB: SOCIAL NETWORK -->
+        <div id="tab-social" class="profile-tab-content" style="display:none;">
+          <div class="social-container" style="width: 100%;">
+            <!-- JOIN PARTY INPUT (Important) -->
+            <div class="join-party-card"
+              style="background:var(--surface-2); padding:20px; border-radius:12px; margin-bottom:30px; display:flex; gap:15px; align-items:center; border:1px solid var(--border);">
+              <div style="flex:1;">
+                <h4 style="margin:0 0 5px 0; color:#fff;">Join a Watch Party</h4>
+                <p style="margin:0; font-size:12px; color:gray;">Paste the Session ID from your friend here:</p>
+              </div>
+              <input type="text" id="joinSessionInput" placeholder="Session ID..."
+                style="background:#000; border:1px solid var(--border); color:#fff; padding:10px; border-radius:8px; width:200px;">
+
+              <!-- This button calls the JOIN function -->
+              <button class="btn btn-primary"
+                onclick="watchPartyUI.join(document.getElementById('joinSessionInput').value)">
+                Join Room
+              </button>
             </div>
-            <div class="stat-box">
-              <span class="val" id="statShows">0</span>
-              <span class="lbl">Shows Saved</span>
+            <!-- Social Tabs -->
+            <div class="social-tabs" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+              <button class="social-tab-btn active" onclick="socialUI.switchTab('profile')"
+                style="padding: 8px 16px; cursor: pointer;">
+                <i class="fas fa-user"></i> My Profile
+              </button>
+              <button class="social-tab-btn" onclick="socialUI.switchTab('friends')"
+                style="padding: 8px 16px; cursor: pointer;">
+                <i class="fas fa-users"></i> Friends
+              </button>
+              <button class="social-tab-btn" onclick="socialUI.switchTab('requests')"
+                style="padding: 8px 16px; cursor: pointer;">
+                <i class="fas fa-user-plus"></i> Requests <span class="badge" id="requestsBadge">0</span>
+              </button>
+              <button class="social-tab-btn" onclick="socialUI.switchTab('search')"
+                style="padding: 8px 16px; cursor: pointer;">
+                <i class="fas fa-search"></i> Find Users
+              </button>
+              <button class="social-tab-btn" onclick="socialUI.switchTab('followers')"
+                style="padding: 8px 16px; cursor: pointer;">
+                <i class="fas fa-heart"></i> Followers
+              </button>
             </div>
-            <div class="stat-box full">
-              <span class="val" id="statTotalItems">0</span>
-              <span class="lbl">Total Collection</span>
+
+            <!-- Social Content Container -->
+            <div class="social-content" style="width: 100%;">
+
+              <!-- MY PROFILE TAB -->
+              <div class="social-tab-content active" id="tab-profile" style="display: block;">
+                <div class="profile-card-large">
+                  <div class="profile-header">
+                    <img src="" id="profileAvatar" class="profile-avatar-large" alt="Profile">
+                    <div class="profile-info">
+                      <h2 id="profileName">Loading...</h2>
+                      <p id="profileEmail" class="profile-email">—</p>
+                      <div class="profile-stats">
+                        <div class="stat">
+                          <span class="stat-value" id="statFriends">0</span>
+                          <span class="stat-label">Friends</span>
+                        </div>
+                        <div class="stat">
+                          <span class="stat-value" id="statFollowers">0</span>
+                          <span class="stat-label">Followers</span>
+                        </div>
+                        <div class="stat">
+                          <span class="stat-value" id="statMovies">0</span>
+                          <span class="stat-label">Movies Watched</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="profile-actions">
+                    <button class="btn-secondary" onclick="socialUI.editProfile()">
+                      <i class="fas fa-edit"></i> Edit Profile
+                    </button>
+                    <button class="btn-secondary" onclick="socialUI.viewStats()">
+                      <i class="fas fa-chart-line"></i> View Stats
+                    </button>
+                  </div>
+
+                  <div class="profile-section">
+                    <h3>Bio</h3>
+                    <p id="profileBio" class="profile-bio">No bio added yet</p>
+                  </div>
+
+                  <div class="profile-section">
+                    <h3>Preferences</h3>
+                    <div class="preference-item">
+                      <label>
+                        <input type="checkbox" id="prefPrivate"
+                          onchange="socialUI.updatePreference('isPrivate', this.checked)">
+                        <span>Private Profile</span>
+                      </label>
+                    </div>
+                    <div class="preference-item">
+                      <label>
+                        <input type="checkbox" id="prefActivity" checked
+                          onchange="socialUI.updatePreference('showActivity', this.checked)">
+                        <span>Show My Activity</span>
+                      </label>
+                    </div>
+                    <div class="preference-item">
+                      <label>
+                        <input type="checkbox" id="prefMessages" checked
+                          onchange="socialUI.updatePreference('allowMessages', this.checked)">
+                        <span>Allow Friend Requests</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- FRIENDS LIST TAB -->
+              <div class="social-tab-content" id="tab-friends" style="display: none;">
+                <div class="friends-header">
+                  <h3>Your Friends</h3>
+                  <span class="friends-count" id="friendsCount">0 friends</span>
+                </div>
+                <div class="friends-grid" id="friendsList">
+                  <div class="empty-state">
+                    <i class="fas fa-user-slash"></i>
+                    <p>No friends yet. Search for users to add them!</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- FRIEND REQUESTS TAB -->
+              <div class="social-tab-content" id="tab-requests" style="display: none;">
+                <div class="requests-header">
+                  <h3>Friend Requests</h3>
+                </div>
+                <div class="requests-list" id="requestsList">
+                  <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <p>No pending requests</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SEARCH USERS TAB -->
+              <div class="social-tab-content" id="tab-search" style="display: none;">
+                <div class="search-users-wrapper">
+                  <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="userSearchInput" placeholder="Search by name or email..."
+                      onkeyup="socialUI.searchUsers(this.value)">
+                  </div>
+                  <div class="search-results" id="searchUsersList">
+                    <div class="empty-state">
+                      <i class="fas fa-search"></i>
+                      <p>Enter a name or email to search for users</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- FOLLOWERS TAB -->
+              <div class="social-tab-content" id="tab-followers" style="display: none;">
+                <div class="followers-header">
+                  <h3>Your Followers</h3>
+                  <span class="followers-count" id="followersCount">0 followers</span>
+                </div>
+                <div class="followers-grid" id="followersList">
+                  <div class="empty-state">
+                    <i class="fas fa-user"></i>
+                    <p>You have no followers yet</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- TAB: ANALYTICS -->
+        <div id="tab-analytics" class="profile-tab-content" style="display:none;">
+          <div class="analytics-container" style="width: 100%;">
+
+            <!-- Analytics Tabs -->
+            <div class="analytics-tabs" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+              <button class="analytics-tab-btn active" onclick="analyticsUI.switchTab('feed')"
+                style="padding: 8px 16px; cursor: pointer;">
+                <i class="fas fa-stream"></i> Activity Feed
+              </button>
+              <button class="analytics-tab-btn" onclick="analyticsUI.switchTab('recommendations')"
+                style="padding: 8px 16px; cursor: pointer;">
+                <i class="fas fa-star"></i> Recommended
+              </button>
+              <button class="analytics-tab-btn" onclick="analyticsUI.switchTab('trending')"
+                style="padding: 8px 16px; cursor: pointer;">
+                <i class="fas fa-fire"></i> Trending
+              </button>
+              <button class="analytics-tab-btn" onclick="analyticsUI.switchTab('stats')"
+                style="padding: 8px 16px; cursor: pointer;">
+                <i class="fas fa-chart-bar"></i> My Stats
+              </button>
+            </div>
+
+            <!-- Analytics Content -->
+            <div class="analytics-content" style="width: 100%;">
+
+              <!-- ACTIVITY FEED TAB -->
+              <div class="analytics-tab-content active" id="tab-feed" style="display: block;">
+                <div class="activity-feed" id="activityFeed">
+                  <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <p>No activity yet</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- RECOMMENDATIONS TAB -->
+              <div class="analytics-tab-content" id="tab-recommendations" style="display: none;">
+                <div class="recommendations-header">
+                  <h3>Recommended For You</h3>
+                  <!-- This subtitle will change dynamically via JS -->
+                  <p class="subtitle">Based on your viewing history</p>
+                </div>
+                <!-- The grid where cards will be injected -->
+                <div class="recommendations-grid" id="recommendationsList"></div>
+              </div>
+              <!-- TRENDING TAB (Advanced Leaderboard) -->
+              <div class="analytics-tab-content" id="tab-trending" style="display: none;">
+
+                <div class="trending-dashboard">
+                  <!-- Header & Filters -->
+                  <div class="trending-header-row">
+                    <div>
+                      <h3>Global Leaderboard</h3>
+                      <p class="subtitle">Top content on Aether right now</p>
+                    </div>
+                    <div class="trend-filters">
+                      <button class="filter-pill active" onclick="analyticsUI.filterTrending('week')">This Week</button>
+                      <button class="filter-pill" onclick="analyticsUI.filterTrending('day')">Today</button>
+                    </div>
+                  </div>
+
+                  <!-- 1. THE PODIUM (Top 3) -->
+                  <div class="trending-podium" id="trendingPodium">
+                    <!-- Injected via JS -->
+                  </div>
+
+                  <!-- 2. THE LIST (Ranks 4-10) -->
+                  <div class="trending-list-container">
+                    <div class="list-header">
+                      <span>Rank</span>
+                      <span>Title</span>
+                      <span style="text-align:right">Views</span>
+                      <span style="text-align:center">Trend</span>
+                      <span>Action</span>
+                    </div>
+                    <div id="trendingListItems">
+                      <!-- Injected via JS -->
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- STATS TAB -->
+              <div class="analytics-tab-content" id="tab-stats" style="display: none;">
+                <div class="stats-dashboard">
+                  <!-- STAT CARDS -->
+                  <div class="stats-grid">
+                    <div class="stat-card">
+                      <div class="stat-icon"><i class="fas fa-play"></i></div>
+                      <h4>Total Watched</h4>
+                      <p class="stat-number" id="statTotalWatched">0</p>
+                      <p class="stat-unit">movies</p>
+                    </div>
+                    <div class="stat-card">
+                      <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                      <h4>Watch Time</h4>
+                      <p class="stat-number" id="statWatchTime">0</p>
+                      <p class="stat-unit">hours</p>
+                    </div>
+                    <div class="stat-card">
+                      <div class="stat-icon"><i class="fas fa-star"></i></div>
+                      <h4>Average Rating</h4>
+                      <p class="stat-number" id="statAvgRating">0.0</p>
+                      <p class="stat-unit">/ 5</p>
+                    </div>
+                    <div class="stat-card">
+                      <div class="stat-icon"><i class="fas fa-fire"></i></div>
+                      <h4>Watch Streak</h4>
+                      <p class="stat-number" id="statStreak">0</p>
+                      <p class="stat-unit">days</p>
+                    </div>
+                  </div>
+
+                  <!-- FAVORITE GENRE -->
+                  <div class="stats-section">
+                    <h3>Your Favorite Genre</h3>
+                    <div class="genre-display" id="favoriteGenre">
+                      <p>—</p>
+                    </div>
+                  </div>
+
+                  <!-- RECENT MOVIES -->
+                  <div class="stats-section">
+                    <h3>Recently Watched</h3>
+                    <div class="recent-movies" id="recentMovies">
+                      <div class="empty-state">
+                        <p>No movies watched yet</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- RATINGS SUMMARY -->
+                  <div class="stats-section">
+                    <h3>Ratings Summary</h3>
+                    <div class="ratings-summary" id="ratingsSummary">
+                      <div class="rating-item">
+                        <span>5 Stars</span>
+                        <div class="rating-bar">
+                          <div class="rating-fill" style="width: 0%"></div>
+                        </div>
+                      </div>
+                      <div class="rating-item">
+                        <span>4 Stars</span>
+                        <div class="rating-bar">
+                          <div class="rating-fill" style="width: 0%"></div>
+                        </div>
+                      </div>
+                      <div class="rating-item">
+                        <span>3 Stars</span>
+                        <div class="rating-bar">
+                          <div class="rating-fill" style="width: 0%"></div>
+                        </div>
+                      </div>
+                      <div class="rating-item">
+                        <span>2 Stars</span>
+                        <div class="rating-bar">
+                          <div class="rating-fill" style="width: 0%"></div>
+                        </div>
+                      </div>
+                      <div class="rating-item">
+                        <span>1 Star</span>
+                        <div class="rating-bar">
+                          <div class="rating-fill" style="width: 0%"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+  </section>
+
+  <!-- ============================================
+     VIEW: WATCH PARTY (Theater & Chat)
+     ============================================ -->
+  <!-- VIEW: WATCH PARTY (Theater Mode) -->
+  <section id="view-watch-party" class="view-container" style="padding-top: 0;">
+    <div class="watch-party-container">
+
+      <!-- LEFT: THEATER AREA -->
+      <div class="watch-party-main">
+
+        <!-- 1. Theater Header -->
+        <div class="theater-header">
+          <button class="btn-icon-text" onclick="watchPartyUI.closeSession()">
+            <i class="fas fa-arrow-left"></i> <span>Exit Party</span>
+          </button>
+
+          <div style="text-align:center;">
+            <div class="theater-title" id="sessionMovieTitle">Loading...</div>
+            <div id="sessionMovieInfo" style="font-size:11px; color:#888;">Connecting...</div>
+          </div>
+
+          <div class="theater-status">
+            <span class="status-dot" id="liveIndicator"></span> Live
+          </div>
+        </div>
+
+        <!-- 2. Video Player Area -->
+        <div class="video-player-wrapper">
+          <div id="watchPartyVideo" class="watch-party-video">
+            <div class="placeholder-screen">
+              <i class="fas fa-film"></i>
+              <p>Waiting for video source...</p>
             </div>
           </div>
         </div>
 
-        <div class="stats-card" style="margin-top:20px;">
-          <button class="btn btn-outline" style="width:100%; justify-content:center;" onclick="app.go('settings')">
-            <i class="fas fa-cog"></i> Settings
-          </button>
+        <!-- 3. Sync Controls Bar -->
+        <div class="sync-controls-bar">
+
+          <!-- LEFT: Controls -->
+          <div class="controls-left" style="display:flex; align-items:center; gap:15px;">
+            <button class="btn-sync" id="playPauseBtn" onclick="watchPartyUI.togglePlayPause()">
+              <i class="fas fa-play"></i>
+            </button>
+
+            <!-- TV Episode Controls (Hidden by default, shown by JS if TV) -->
+            <div id="partyEpControls" style="display:none; gap:8px;">
+              <button class="btn-small" onclick="watchPartyUI.changeEpisode(-1)" title="Prev Ep">
+                <i class="fas fa-step-backward"></i>
+              </button>
+              <button class="btn-small" onclick="watchPartyUI.changeEpisode(1)" title="Next Ep">
+                <i class="fas fa-step-forward"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- CENTER: Status -->
+          <div class="controls-center">
+            <span class="label">Status:</span>
+            <strong id="syncStatusText" style="color:#fbbf24">Paused</strong>
+          </div>
+
+          <!-- RIGHT: Source -->
+          <div class="controls-right" style="display:flex; align-items:center; gap:10px;">
+            <button class="btn-small" onclick="watchPartyUI.switchProvider()"
+              style="font-size:10px; border-color:#444; color:#aaa;">
+              <i class="fas fa-server"></i> Switch Source
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- 3. TABS CONTENT -->
-      <div class="profile-main-col">
-        <div class="profile-tabs">
-          <button class="tab-btn active" onclick="app.switchProfileTab('watchlist')">My Watchlist</button>
-          <button class="tab-btn" onclick="app.switchProfileTab('history')">Watch History</button>
+      <!-- RIGHT: SOCIAL SIDEBAR -->
+      <aside class="watch-party-sidebar">
+
+        <!-- 1. TABS HEADER -->
+        <div class="sidebar-tabs">
+          <!-- Chat Tab -->
+          <div class="sb-tab active" onclick="watchPartyUI.switchSidebarTab('chat')">
+            Chat
+          </div>
+
+          <!-- Episodes Tab (Hidden by default, JS shows it for TV) -->
+          <div class="sb-tab" id="tabBtnQueue" onclick="watchPartyUI.switchSidebarTab('queue')">
+            Episodes
+          </div>
+
+          <!-- Viewers Tab -->
+          <div class="sb-tab" onclick="watchPartyUI.switchSidebarTab('participants')">
+            Users (<span id="syncCount">1</span>)
+          </div>
         </div>
 
-        <div id="tab-watchlist" class="profile-tab-content active">
-          <div class="media-grid" id="userPageGrid"></div>
+        <!-- 2. CHAT PANEL -->
+        <div id="partyTabChat" class="sidebar-content-panel" style="display:flex;">
+          <div class="chat-area">
+            <div class="chat-messages" id="chatMessages">
+              <div class="chat-system-msg">Session started. Invite friends!</div>
+            </div>
+          </div>
+          <div class="chat-input-box">
+            <input type="text" id="chatInput" placeholder="Type a message..." autocomplete="off"
+              onkeypress="if(event.key==='Enter') watchPartyUI.sendChatMessage()">
+            <button class="chat-send" onclick="watchPartyUI.sendChatMessage()">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
         </div>
 
-        <div id="tab-history" class="profile-tab-content" style="display:none;">
-          <div class="media-grid" id="userHistoryGrid"></div>
+        <!-- 3. EPISODES / QUEUE PANEL (The Missing Part) -->
+        <div id="partyTabQueue" class="sidebar-content-panel" style="display:none;">
+          <div style="padding:15px; border-bottom:1px solid var(--border);">
+            <h3 class="section-title" id="queueTitle" style="margin:0;">Season 1</h3>
+          </div>
+          <div class="queue-list" id="partyQueueList">
+            <!-- Javascript will inject .queue-item divs here -->
+            <div style="padding:20px; text-align:center; color:gray;">Loading episodes...</div>
+          </div>
         </div>
-      </div>
+
+        <!-- 4. PARTICIPANTS PANEL -->
+        <div id="partyTabParticipants" class="sidebar-content-panel" style="display:none;">
+          <div class="sidebar-section">
+            <h3 class="section-title">Online Users</h3>
+            <div class="participants-list" id="participantsList"></div>
+          </div>
+
+          <!-- Invite Footer -->
+          <div class="sidebar-footer">
+            <div class="invite-row">
+              <input type="text" id="sessionIdDisplay" readonly value="..." style="width:100%;">
+              <button onclick="watchPartyUI.copySessionId()"><i class="fas fa-copy"></i></button>
+            </div>
+          </div>
+        </div>
+
+      </aside>
 
     </div>
   </section>
 
 
-  <!-- VIEW: AUTH / LOGIN -->
+  <!-- VIEW: CONSTELLATION (Visual Discovery) -->
+  <section id="view-constellation" class="view-container">
+    <div class="constellation-ui">
+      <div class="constellation-header">
+        <h1 class="hero-title">Cinema Constellation</h1>
+        <p>Traverse the connections between stories.</p>
+      </div>
+
+      <!-- Controls -->
+      <div class="constellation-controls">
+        <button class="btn-icon magnetic" onclick="constellationUI.resetZoom()"><i
+            class="fas fa-compress-arrows-alt"></i></button>
+      </div>
+    </div>
+
+    <!-- The Universe Container -->
+    <div id="universeStage" class="universe-stage">
+      <!-- SVG Layer for connecting lines -->
+      <svg id="connectionLines" class="connection-lines"></svg>
+      <!-- Nodes will be injected here -->
+      <div id="nodesContainer"></div>
+    </div>
+
+    <!-- Info Panel (Appears on Hover) -->
+    <div id="nodeInfoPanel" class="node-info-panel">
+      <h3 id="nodeTitle">Title</h3>
+      <div id="nodeReason" class="node-reason">Connection</div>
+      <div class="node-meta">
+        <span id="nodeYear">2024</span> • <span id="nodeRating">8.5</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- MISSION CONTROL OVERLAY -->
+  <div id="missionOverlay" class="view-container">
+    <div class="mission-header">
+      <div class="level-circle">
+        <svg viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="45" class="bg"></circle>
+          <circle cx="50" cy="50" r="45" class="progress" id="userLevelCircle"></circle>
+        </svg>
+        <span id="userLevelDisplay">LVL 1</span>
+      </div>
+
+      <div class="xp-details">
+        <h2 id="xpTitle">Traveler</h2>
+        <div class="xp-bar-container">
+          <div class="xp-bar-fill" id="userXpBar"></div>
+        </div>
+        <p id="xpText">0 / 1000 XP to next level</p>
+      </div>
+
+      <div class="streak-badge">
+        <i class="fas fa-fire"></i> <span id="userStreak">0</span> Day Streak
+      </div>
+
+      <button class="close-btn" onclick="missionUI.close()">✕</button>
+    </div>
+
+    <div class="mission-layout">
+      <!-- DAILY QUESTS -->
+      <div class="quest-section">
+        <h3><i class="fas fa-calendar-day"></i> Daily Bounties</h3>
+        <div id="dailyQuestsList" class="quest-grid"></div>
+      </div>
+
+      <!-- LIFETIME ACHIEVEMENTS -->
+      <div class="quest-section">
+        <h3><i class="fas fa-trophy"></i> Achievements</h3>
+        <div id="achievementsList" class="achievement-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW: AUTH / LOGIN --->
   <section id="view-auth" style="
     position: fixed; inset: 0; z-index: 9999; background: var(--bg); 
     display: flex; align-items: center; justify-content: center;
@@ -736,7 +1487,6 @@
       box-shadow: 0 30px 60px rgba(0,0,0,0.5); position: relative; overflow: hidden;
     ">
 
-      <!-- Decorative Glow -->
       <div
         style="position: absolute; top: -50px; left: -50px; width: 150px; height: 150px; background: var(--accent); filter: blur(80px); opacity: 0.4; border-radius: 50%;">
       </div>
@@ -750,7 +1500,6 @@
         style="color: #ff4444; font-size: 13px; text-align: center; margin-bottom: 15px; display: none;">Error message
         here</div>
 
-      <!-- Inputs -->
       <div class="setting-group">
         <div class="input-label">Email</div>
         <input type="email" id="authEmail" class="cyber-input" placeholder="user@example.com">
@@ -761,7 +1510,6 @@
         <input type="password" id="authPass" class="cyber-input" placeholder="••••••••">
       </div>
 
-      <!-- Login Mode Buttons -->
       <div id="btnContainerLogin">
         <button class="btn btn-primary" onclick="app.handleLogin()"
           style="width: 100%; justify-content: center; margin-bottom: 15px;">
@@ -773,7 +1521,6 @@
         </div>
       </div>
 
-      <!-- Signup Mode Buttons (Hidden initially) -->
       <div id="btnContainerSignup" style="display: none;">
         <div class="setting-group">
           <div class="input-label">Display Name</div>
@@ -869,16 +1616,266 @@
 
     </div>
   </div>
+
+  <!-- ACTOR MODAL -->
+  <div class="video-modal" id="actorModal" style="z-index: 7000;">
+    <div class="modal-bg" onclick="actorUI.close()"></div>
+
+    <div class="auth-card actor-card"
+      style="width:900px; max-width:95%; height:80vh; padding:0; background:#000; display:flex; flex-direction:column; overflow:hidden;">
+
+      <!-- Header / Close -->
+      <div style="position:absolute; top:20px; right:20px; z-index:10;">
+        <div class="close-icon-circle" onclick="actorUI.close()"><i class="fas fa-times"></i></div>
+      </div>
+
+      <div class="actor-layout">
+        <!-- Left: Image -->
+        <div class="actor-sidebar">
+          <img id="actorImage" src="" alt="Actor">
+        </div>
+
+        <!-- Right: Info -->
+        <div class="actor-details-panel">
+          <h2 id="actorName">Name</h2>
+          <div id="actorMeta" style="color:var(--text-muted); font-size:12px; margin-bottom:15px;"></div>
+
+          <!-- Affinity Badge -->
+          <div id="affinityBadge"
+            style="display:none; background:rgba(255,255,255,0.1); padding:8px 12px; border-radius:6px; font-size:12px; margin-bottom:20px; border:1px solid var(--border);">
+          </div>
+
+          <p id="actorBio"
+            style="font-size:14px; color:#ccc; line-height:1.6; max-height:100px; overflow-y:auto; margin-bottom:30px; padding-right:10px;">
+          </p>
+
+          <h3
+            style="font-size:14px; text-transform:uppercase; letter-spacing:1px; margin-bottom:15px; border-bottom:1px solid var(--border); padding-bottom:10px;">
+            Known For</h3>
+
+          <div class="recommendations-grid" id="actorCredits"
+            style="overflow-y:auto; padding-bottom:50px; max-height:400px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ============================================
+     COMPONENT TEMPLATES
+     ============================================ -->
+
+  <!-- FRIEND CARD TEMPLATE -->
+  <template id="friendCardTemplate">
+    <div class="friend-card"
+      style="background:var(--surface-2); padding:15px; border-radius:12px; text-align:center; border:1px solid var(--border);">
+      <img src="" class="friend-avatar"
+        style="width:60px; height:60px; border-radius:50%; object-fit:cover; margin-bottom:10px;">
+      <h4 class="friend-name" style="margin:0; font-size:14px;">Name</h4>
+      <p class="friend-status" style="font-size:11px; color:#10b981; margin-bottom:10px;">Online</p>
+      <div class="friend-actions" style="display:flex; justify-content:center; gap:10px;">
+        <button class="btn-small danger" style="color:#ff4444; border-color:#ff4444;">Remove</button>
+      </div>
+    </div>
+  </template>
+
+  <!-- FRIEND REQUEST CARD TEMPLATE -->
+  <template id="requestCardTemplate">
+    <div class="request-card"
+      style="display:flex; align-items:center; gap:15px; padding:15px; background:var(--surface-2); border-radius:12px; margin-bottom:10px;">
+      <img src="" class="request-avatar" style="width:40px; height:40px; border-radius:50%;">
+      <div style="flex:1;">
+        <h4 class="request-name" style="font-size:14px; margin:0;">Name</h4>
+        <p class="request-time" style="font-size:11px; color:gray;">Sent a request</p>
+      </div>
+      <div class="request-actions" style="display:flex; gap:5px;">
+        <button class="btn-small accept" style="color:#10b981; border-color:#10b981;"><i
+            class="fas fa-check"></i></button>
+        <button class="btn-small reject" style="color:#ff4444; border-color:#ff4444;"><i
+            class="fas fa-times"></i></button>
+      </div>
+    </div>
+  </template>
+
+
+  <!-- ACTIVITY ITEM TEMPLATE -->
+  <template id="activityItemTemplate">
+    <div class="activity-item" style="display:flex; gap:15px; padding:15px; border-bottom:1px solid var(--border);">
+      <img src="" class="activity-avatar" style="width:40px; height:40px; border-radius:50%;">
+      <div class="activity-content">
+        <p class="activity-text" style="font-size:13px; margin:0;">
+          <strong class="activity-user">User</strong> <span class="activity-action">watched</span> <strong
+            class="activity-movie" style="color:var(--accent)">Movie</strong>
+        </p>
+        <p class="activity-time" style="font-size:11px; color:gray; margin-top:4px;">Just now</p>
+      </div>
+      <div class="activity-rating"></div>
+    </div>
+  </template>
+
+  <!-- MOVIE CARD TEMPLATE -->
+  <template id="movieCardTemplate">
+    <div class="movie-card-small">
+      <img src="" class="movie-poster-small" alt="Movie">
+      <h4 class="movie-title-small">Title</h4>
+      <p class="movie-rating-small">
+        <i class="fas fa-star"></i> 0.0
+      </p>
+      <button class="btn-small" onclick="watchPartyUI.watchMovie(this)">
+        <i class="fas fa-play"></i> Watch
+      </button>
+    </div>
+  </template>
+
+  <!-- SEARCH USER RESULT TEMPLATE -->
+  <template id="searchResultTemplate">
+    <div class="search-result-item">
+      <img src="" class="result-avatar" alt="User">
+      <div class="result-info">
+        <h4 class="result-name">Name</h4>
+        <p class="result-email">email@example.com</p>
+      </div>
+      <!-- Button logic handled by JS -->
+      <button class="btn-primary" id="actionBtn">Add</button>
+    </div>
+  </template>
+
+  <!-- ORACLE MODAL -->
+  <div class="oracle-modal" id="oracleModal">
+    <div class="modal-bg" onclick="oracleUI.close()"></div>
+    <div class="oracle-content">
+
+      <!-- INPUT STATE -->
+      <div id="oracleInputs">
+        <div class="oracle-header">
+          <i class="fas fa-crystal-ball"></i>
+          <h2>The Oracle</h2>
+          <p>How are you feeling right now?</p>
+        </div>
+        <div class="oracle-tags" id="oracleTags"></div>
+        <div class="oracle-action" id="oracleActionArea">
+          <button class="btn btn-primary" onclick="oracleUI.generatePicks()">Reveal My Destiny</button>
+        </div>
+      </div>
+
+      <!-- LOADING STATE -->
+      <div class="oracle-loader" id="oracleLoader">
+        <div class="spinner">
+          <circle cx="25" cy="25" r="20" fill="none" stroke-width="4"></circle>
+        </div>
+        <p>Consulting the Aether...</p>
+      </div>
+
+      <!-- RESULTS STATE -->
+      <div class="oracle-results" id="oracleResults"></div>
+
+      <div class="oracle-footer" style="text-align:center;"></div>
+    </div>
+  </div>
+
+  <!-- AETHER LENS OVERLAY -->
+  <div id="lensOverlay" class="lens-overlay">
+    <div class="lens-scan-line" id="lensScanLine"></div>
+
+    <button class="lens-close" onclick="window.lensUI.toggle()"><i class="fas fa-times"></i></button>
+
+    <div class="lens-grid">
+
+      <!-- 1. Color Analysis -->
+      <div class="lens-widget">
+        <div class="widget-title">Chromatic Analysis</div>
+        <div class="palette-container" id="lensPalette"></div>
+        <p style="margin-top:10px; font-size:12px; color:#888;">Dominant mood colors extracted from film imagery.</p>
+      </div>
+
+      <!-- 2. Sonic Signature -->
+      <div class="lens-widget">
+        <div class="widget-title">Sonic Signature</div>
+        <div class="audio-visualizer">
+          <div class="av-bar" style="animation-delay:0.1s"></div>
+          <div class="av-bar" style="animation-delay:0.3s"></div>
+          <div class="av-bar" style="animation-delay:0.5s"></div>
+          <div class="av-bar" style="animation-delay:0.2s"></div>
+          <div class="av-bar" style="animation-delay:0.4s"></div>
+        </div>
+        <h3 id="lensMusicText" style="color:#fff; font-size:16px;">Soundtrack</h3>
+        <a id="lensMusicLink" href="#" target="_blank" class="btn-link" style="color:var(--accent);">
+          <i class="fab fa-spotify"></i> Listen on Spotify
+        </a>
+      </div>
+
+      <!-- 3. Temporal Context -->
+      <div class="lens-widget">
+        <div class="widget-title">Temporal Context</div>
+        <h2 style="font-family:'Playfair Display'; font-size:2rem; margin:0 0 10px; color:#fff;">Time Capsule</h2>
+        <p id="lensYearFact" style="font-size:14px; color:#ccc; line-height:1.5;">...</p>
+      </div>
+
+      <!-- 4. Vibe/Keywords -->
+      <div class="lens-widget">
+        <div class="widget-title">Narrative DNA</div>
+        <div class="lens-tags" id="lensKeywords"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SECURITY BREACH MODAL -->
+  <div id="securityModal" class="security-overlay">
+    <div class="security-box">
+      <div class="security-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <h1 class="security-title">RESTRICTED CONTENT DETECTED</h1>
+      <p class="security-msg">
+        This search query violates the Aether Safety Protocols.
+        <br><br>
+        <span style="color: #ff4444; font-weight: 700;">ACTIVITY HAS BEEN FLAGGED.</span>
+      </p>
+      <div class="security-actions">
+        <button class="btn-security" onclick="app.closeSecurityModal()">I Understand</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module">
     // 1. IMPORT FIREBASE MODULES
     import { loginEmail, registerEmail, loginGoogle, logoutUser, initAuthObserver } from "./js/firebase/auth.js";
-    import { addToCloudList, removeFromCloudList, getUserData, saveUserSettings, trackGlobalView, getGlobalRankings } from "./js/firebase/db.js";
+    import {
+      addToCloudList, removeFromCloudList, getUserData, saveUserSettings, trackGlobalView, getGlobalRankings,
+      trackHistory, addFavorite, removeFavorite, rateMediaUser, getUserRating
+    } from "./js/firebase/db.js";
+    import { updateUserProfile } from "./js/firebase/social.js";
     import { getAuth, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { player } from "./js/player/engine.js";
 
+    // 2. IMPORT UI CONTROLLERS
+    import { SocialUIController } from "./js/ui/social-ui.js";
+    import { AnalyticsUIController } from "./js/ui/analytics-ui.js";
+    import { WatchPartyUIController } from "./js/ui/watch-party-ui.js";
+    import { OracleUIController } from "./js/ui/oracle-ui.js";
+    import { ActorUIController } from "./js/ui/actor-ui.js";
+    import { ConstellationUIController } from "./js/ui/constellation-ui.js"; // Or define inlineML
+    import { ProfileGateUI } from "./js/ui/profile-gate-ui.js";
+    import { LensUIController } from "./js/ui/lens-ui.js";
+
+    import { ChallengeEngine } from "./js/gamification/ChallengeEngine.js"; // You need this file (from previous prompt)
+    import "./js/ui/mission-ui.js"; // This loads your UI class
+
+    // Initialize UI Controllers globally
+    const socialUI = new SocialUIController();
+    const analyticsUI = new AnalyticsUIController();
+    const watchPartyUI = new WatchPartyUIController();
+    const oracleUI = new OracleUIController();
+    const actorUI = new ActorUIController();
+    const constellationUI = new ConstellationUIController();
+    window.constellationUI = constellationUI; // Expose to HT
+    const lensUI = new LensUIController();
+    window.lensUI = lensUI;
+
+    const profileGateUI = new ProfileGateUI();
     gsap.registerPlugin(ScrollTrigger);
     // Expose player to window so HTML onclicks work
     window.player = player;
+    window.profileGateUI = profileGateUI;
     /**
      * AETHER STREAM - ULTIMATE EDITION
      * Integrated with Firebase Auth
@@ -891,23 +1888,103 @@
     const GENRE_MAP = { 28: 10759, 12: 10759, 35: 35, 80: 80, 18: 18, 14: 10765, 27: 9648, 878: 10765, 53: 9648 };
 
     const api = {
+      // Read directly from storage to ensure it updates immediately on profile switch
+      get isKids() {
+        return localStorage.getItem('aether_is_kids') === 'true';
+      },
       get: async (endpoint, params = {}) => {
-        const query = new URLSearchParams({ api_key: API_KEY, language: 'en-US', ...params }).toString();
+        // 1. Base Parameters
+        let queryParams = {
+          api_key: API_KEY,
+          language: 'en-US',
+          include_adult: 'false', // HARD LOCK: Never allow explicit adult flag
+          ...params
+        };
+
+        // 2. KIDS MODE FORCE FIELD
+        if (api.isKids) {
+
+          // A. Strict Certifications (US Ratings: G, PG only. Excludes PG-13, R, NC-17)
+          // Only apply this to lists/discover/search, not specific IDs
+          if (endpoint.includes('discover') || endpoint.includes('search')) {
+            queryParams.certification_country = "US";
+            queryParams.certification_lte = "PG";
+
+            // B. Ban Specific Genres (Horror, Crime, War, Thriller)
+            // 27=Horror, 80=Crime, 53=Thriller, 10752=War, 18=Drama(optional, usually boring for kids)
+            queryParams.without_genres = "27,80,10752,53";
+
+            // C. Force Animation/Family priority (Optional but recommended)
+            // If it's a generic discover call, boost these
+            if (!queryParams.with_genres && endpoint.includes('discover')) {
+              // queryParams.with_genres = "16,10751"; // Animation, Family
+            }
+          }
+        }
+
+        const query = new URLSearchParams(queryParams).toString();
+
         try {
           const res = await fetch(`${BASE_URL}${endpoint}?${query}`);
-          return await res.json();
-        } catch (e) { console.error('API Error:', e); return {}; }
+          if (!res.ok) return null;
+          const data = await res.json();
+
+          // 3. CLIENT-SIDE SAFETY NET (Double Check)
+          // Sometimes API slips up. We manually filter the results array if it exists.
+          if (api.isKids && data.results && Array.isArray(data.results)) {
+            data.results = data.results.filter(m => {
+              // A. Genre Filter (Existing)
+              const badGenres = [27, 80, 53, 10752];
+              if (m.genre_ids && m.genre_ids.some(g => badGenres.includes(g))) return false;
+              if (m.adult) return false;
+
+              // B. TITLE & DESCRIPTION SCANNER (New!)
+              // Check if the Movie Title or Description contains a restricted word
+              const textToCheck = (m.title || m.name || "") + " " + (m.overview || "");
+
+              // Use the RESTRICTED_TERMS list we defined earlier
+              const hasBadWord = RESTRICTED_TERMS.some(pattern => pattern.test(textToCheck));
+
+              if (hasBadWord) {
+                console.log("Blocked content by title/desc:", m.title);
+                return false; // Remove this specific movie from results
+              }
+
+              return true;
+            });
+          }
+
+          return data;
+
+        } catch (e) {
+          console.error('API Error:', e);
+          return null;
+        }
       },
+      /*
       findVideo: async (id, type) => {
         const endpoint = type === 'tv' ? `/tv/${id}/videos` : `/movie/${id}/videos`;
         const data = await api.get(endpoint);
-        if (data.results) {
+        if (data && data.results) {
+          const trailer = data.results.find(v => v.type === 'Trailer') || data.results[0];
+          return trailer ? trailer.key : null;
+        }
+        return null;
+      }*/
+
+      findVideo: async (id, type) => {
+        const endpoint = type === 'tv' ? `/tv/${id}/videos` : `/movie/${id}/videos`;
+        const data = await api.get(endpoint);
+        if (data && data.results) {
+          // Prefer "Trailer" or "Teaser"
           const trailer = data.results.find(v => v.type === 'Trailer') || data.results[0];
           return trailer ? trailer.key : null;
         }
         return null;
       }
     };
+
+    window.api = api;
 
     const anim = {
       initMagnetic: () => {
@@ -930,7 +2007,7 @@
     };
 
     const ui = {
-      card: (m, forcedType = null) => {
+      /*card: (m, forcedType = null) => {
         if (!m.poster_path) return null;
         const div = document.createElement('div');
         div.className = 'card gpu';
@@ -938,6 +2015,27 @@
         const type = m.media_type || forcedType || (m.title ? 'movie' : 'tv');
         let label = m.media_type ? `<div class="card-label">${type === 'tv' ? 'TV Series' : 'Movie'}</div>` : '';
         div.innerHTML = `${label}<img src="${POSTER_BASE}${m.poster_path}" loading="lazy" alt="${title}">`;
+        div.onclick = () => app.go('detail', { id: m.id, type: type });
+        return div;
+      },*/
+      card: (m, forcedType = null) => {
+        const div = document.createElement('div');
+        div.className = 'card gpu';
+        const title = m.title || m.name || 'Untitled';
+        const type = m.media_type || forcedType || (m.title ? 'movie' : 'tv');
+
+        // LOGIC TO HANDLE MISSING IMAGES
+        let imgSrc;
+        if (m.poster_path) {
+          imgSrc = `https://image.tmdb.org/t/p/w500${m.poster_path}`;
+        } else {
+          // Fallback image
+          imgSrc = 'https://via.placeholder.com/500x750/111/333?text=No+Image';
+        }
+
+        let label = `<div class="card-label">${type === 'tv' ? 'TV' : 'Movie'}</div>`;
+
+        div.innerHTML = `${label}<img src="${imgSrc}" loading="lazy" alt="${title}">`;
         div.onclick = () => app.go('detail', { id: m.id, type: type });
         return div;
       },
@@ -989,6 +2087,58 @@
         .from('.detail-block', { opacity: 0, y: 20, stagger: 0.2 }, "-=0.5");
     };
 
+    const KIDS_AGE_RATINGS = ['G', 'PG', 'TV-Y', 'TV-G', 'TV-PG', 'TV-Y7', 'TV-Y7-FV'];
+    const KIDS_CONTENT_TYPES = ['Animation', 'Family', 'Kids', 'Educational'];
+
+    // SAFETY BLACKLIST (Advanced Regex)
+    // Matches "word", "w o r d", "w.o.r.d", "w-o-r-d", etc.
+    const RESTRICTED_TERMS = [
+      // HENTAI / ANIME (Aggressive Partial Matching)
+      // Catch "hent", "henta", "hentai" with any separators
+      /h[\W_]*e[\W_]*n[\W_]*t[\W_]*a?[\W_]*i?/i,
+      /e[\W_]*c[\W_]*c[\W_]*h[\W_]*i/i,
+      /d[\W_]*o[\W_]*u[\W_]*j[\W_]*i[\W_]*n/i,
+      /y[\W_]*a[\W_]*o[\W_]*i/i,
+      /y[\W_]*u[\W_]*r[\W_]*i/i,
+      /t[\W_]*e[\W_]*n[\W_]*t[\W_]*a[\W_]*c[\W_]*l/i,
+
+      //EXPLICIT (Core words)
+      // We use \b at the start/end of short words to prevent blocking "Sussex" or "Skill"
+      // while still catching "s.e.x"
+      /\bs[\W_]*e[\W_]*x\b/i,
+      /p[\W_]*o[\W_]*r[\W_]*n/i,
+      /x[\W_]*x[\W_]*x/i,
+      /n[\W_]*u[\W_]*d/i,
+      /e[\W_]*r[\W_]*o[\W_]*t/i,
+
+      //ANATOMY
+      /b[\W_]*o[\W_]*o[\W_]*b/i,
+      /t[\W_]*i[\W_]*t[\W_]*s/i, // Added 's' to avoid blocking "Title" or "Titan"
+      /v[\W_]*a[\W_]*g[\W_]*i[\W_]*n/i,
+      /p[\W_]*e[\W_]*n[\W_]*i[\W_]*s/i,
+      /c[\W_]*o[\W_]*c[\W_]*k\b/i, // Boundary to avoid "Cocktail" or "Peacock"
+      /p[\W_]*u[\W_]*s[\W_]*s[\W_]*y/i,
+
+      //VIOLENCE
+      /\bk[\W_]*i[\W_]*l[\W_]*l/i, // Boundary start to avoid "Skill"
+      /m[\W_]*u[\W_]*r[\W_]*d[\W_]*e[\W_]*r/i,
+      /b[\W_]*l[\W_]*o[\W_]*o[\W_]*d/i,
+      /g[\W_]*o[\W_]*r[\W_]*e/i,
+      /s[\W_]*u[\W_]*i[\W_]*c[\W_]*i[\W_]*d/i,
+
+      //DRUGS
+      /c[\W_]*o[\W_]*c[\W_]*a[\W_]*i[\W_]*n/i,
+      /h[\W_]*e[\W_]*r[\W_]*o[\W_]*i[\W_]*n/i,
+      /m[\W_]*e[\W_]*t[\W_]*h/i,
+
+      //HORROR / SCARY (Specific to Kids Mode)
+      /h[\W_]*o[\W_]*r[\W_]*r[\W_]*o[\W_]*r/i,
+      /d[\W_]*e[\W_]*m[\W_]*o[\W_]*n/i,
+      /g[\W_]*h[\W_]*o[\W_]*s[\W_]*t/i,
+      /s[\W_]*c[\W_]*a[\W_]*r[\W_]*y/i,
+      /t[\W_]*e[\W_]*r[\W_]*r[\W_]*o[\W_]*r/i
+    ];
+
     // --- APP DEFINITION ---
     const app = {
       state: {
@@ -1011,50 +2161,397 @@
         player.init();
         initSpotlightAnimation();
         app.initSpotlightStrokes();
+        app.initSidebarFeatures();
 
         // -- FIREBASE AUTH LISTENER --
-        // This waits for Firebase to tell us if user is logged in
         initAuthObserver(
           async (user) => {
-            // USER LOGGED IN
+            // ==========================================
+            // 1. USER LOGGED IN
+            // ==========================================
             app.state.user = user;
             app.updateProfileUI(user);
 
-            // --- NEW: FETCH CLOUD DATA ---
-            const userData = await getUserData(user);
-            if (userData && userData.watchlist) {
-              app.state.watchlist = userData.watchlist;
-              // Refresh UI if on watchlist page or hero buttons
-              app.renderWatchlist();
-              // Force update hero button if current movie exists
-              if (app.state.currentMedia) {
-                const listBtn = document.getElementById('heroListBtn');
-                if (listBtn) app.updateListBtn(listBtn, app.state.currentMedia.id);
-              }
+            // ==========================================
+            // 2. CHECK: Is a profile already selected?
+            // ==========================================
+            const activeProfileId = localStorage.getItem('aether_active_profile');
+
+            if (!activeProfileId) {
+              // --- A. NO PROFILE SELECTED -> SHOW GATE ---
+              console.log("No profile selected. Showing Gate.");
+
+              // Hide App Interface
+              document.querySelector('nav').style.display = 'none';
+              document.querySelector('main').style.display = 'none';
+              document.getElementById('view-auth').style.display = 'none';
+
+              // Show Profile Gate
+              const gate = document.getElementById('profileGateView');
+              gate.style.display = 'flex'; // Force display CSS
+              // Small timeout to allow CSS transition
+              setTimeout(() => gate.classList.add('active'), 10);
+
+              // Initialize Gate UI (Load profiles from DB)
+              window.profileGateUI.init();
+
+              return; // STOP HERE. Do not load the dashboard yet.
             }
 
-            // Restore Settings (Theme)
-            if (userData && userData.settings) {
-              if (userData.settings.theme) {
-                const isDark = userData.settings.theme === 'dark';
-                document.getElementById('themeToggle').checked = isDark;
-                app.applyTheme(userData.settings.theme); // Helper function we will create
-              }
+            // Sync Safety Toggle
+            const safetyToggle = document.getElementById('settingSafetyFilter');
+            if (safetyToggle) {
+              safetyToggle.checked = localStorage.getItem('aether_adult_safety') === 'true';
             }
 
-            // Hide Auth Screen
+            // ==========================================
+            // 3. PROFILE SELECTED -> LOAD DASHBOARD
+            // ==========================================
+            console.log("Profile active:", activeProfileId);
+
+            // Hide Gate (if visible)
+            const gate = document.getElementById('profileGateView');
+            gate.classList.remove('active');
+            setTimeout(() => gate.style.display = 'none', 300);
+
+            // Show App Interface
+            document.querySelector('nav').style.display = 'flex';
+            document.querySelector('main').style.display = 'block';
+
+            // Hide Login Screen with Animation
             const authView = document.getElementById('view-auth');
             gsap.to(authView, {
-              opacity: 0, y: -50, duration: 0.8, ease: "power4.out",
+              opacity: 0,
+              y: -50,
+              duration: 0.8,
+              ease: "power4.out",
               onComplete: () => authView.style.display = 'none'
             });
+
+            // ==========================================
+            // 4. SYNC CLOUD DATA
+            // ==========================================
+            try {
+              const userData = await getUserData(user);
+
+              // Sync Watchlist
+              if (userData && userData.watchlist) {
+                app.state.watchlist = userData.watchlist;
+                app.renderWatchlist();
+                // Update hero buttons if needed
+                if (app.state.currentMedia) {
+                  const listBtn = document.getElementById('heroListBtn');
+                  if (listBtn) app.updateListBtn(listBtn, app.state.currentMedia.id);
+                }
+              }
+
+              // Sync Theme/Settings
+              if (userData && userData.settings && userData.settings.theme) {
+                // Apply saved theme
+                app.applyTheme(userData.settings.theme);
+                // Update toggle switch UI
+                const isDark = userData.settings.theme === 'dark';
+                const toggle = document.getElementById('themeToggle');
+                if (toggle) toggle.checked = isDark;
+              }
+            } catch (err) {
+              console.error("Error syncing user data:", err);
+            }
+
+            window.challengeSystem = new ChallengeEngine(user);
+            await window.challengeSystem.init();
+
+            // ==========================================
+            // 5. LOAD CONTENT (Kids vs Adult)
+            // ==========================================
+            // Clear existing rows to prevent duplicates if switching profiles
+            document.getElementById('homeRows').innerHTML = '';
+
+            const isKids = localStorage.getItem('aether_is_kids') === 'true';
+
+            if (isKids) {
+              console.log("Loading Kids Mode Content...");
+
+              // ------------------------------------------
+              // 1. HERO + SPOTLIGHT FROM FAMILY MOVIES (Unchanged)
+              // ------------------------------------------
+              const kidsMovies = await api.get('/discover/movie', {
+                with_genres: "16,10751",
+                sort_by: "popularity.desc",
+                certification_country: "US",
+                certification_lte: "PG"
+              });
+
+              if (kidsMovies && kidsMovies.results.length) {
+                app.renderHero(kidsMovies.results[0]);
+                if (kidsMovies.results.length > 1)
+                  app.renderSpotlight(kidsMovies.results[1]);
+                ui.row('Popular Animation', kidsMovies.results, 'homeRows', 'movie');
+              }
+
+              // ------------------------------------------
+              // 2. DISNEY SECTION (Updated)
+              // ------------------------------------------
+              const disney = await api.get('/discover/movie', {
+                with_companies: "2,3,2775,6125" // Disney, Pixar, Disney Channel, 20th Animation
+              });
+              if (disney) ui.row('Disney & Pixar', disney.results, 'homeRows', 'movie');
+
+              // ------------------------------------------
+              // 3. DREAMWORKS ANIMATION (Updated)
+              // ------------------------------------------
+              const dreamworks = await api.get('/discover/movie', {
+                with_companies: "521,33" // DreamWorks + Parent Company Universal
+              });
+              if (dreamworks) ui.row('DreamWorks Hits', dreamworks.results, 'homeRows', 'movie');
+
+              // ------------------------------------------
+              // 4. ILLUMINATION ENTERTAINMENT (Unchanged)
+              // ------------------------------------------
+              const illumination = await api.get('/discover/movie', {
+                with_companies: "6704"
+              });
+              if (illumination) ui.row('Illumination Fun', illumination.results, 'homeRows', 'movie');
+
+              // ------------------------------------------
+              // 5. LEGO CONTENT (Unchanged)
+              // ------------------------------------------
+              const lego = await api.get('/discover/movie', {
+                with_keywords: "210024" // LEGO keyword in TMDB
+              });
+              if (lego) ui.row('LEGO Adventures', lego.results, 'homeRows', 'movie');
+
+              // ------------------------------------------
+              // 6. NICKELODEON (Unchanged)
+              // ------------------------------------------
+              const nick = await api.get('/discover/tv', {
+                with_companies: "288" // Nickelodeon
+              });
+              if (nick) ui.row('Nickelodeon Shows', nick.results, 'homeRows', 'tv');
+
+              // ------------------------------------------
+              // 7. CARTOON NETWORK (Updated)
+              // ------------------------------------------
+              const cn = await api.get('/discover/tv', {
+                with_companies: "6869,2503" // Cartoon Network + Cartoon Network Studios
+              });
+              if (cn) ui.row('Cartoon Network Classics', cn.results, 'homeRows', 'tv');
+
+              // ------------------------------------------
+              // 8. EDUCATIONAL CONTENT (Updated with better keywords)
+              // ------------------------------------------
+              const edu = await api.get('/discover/tv', {
+                with_keywords: "9711,10708,209714", // child, children, based on children's book
+                certification_country: "US",
+                certification_lte: "G"
+              });
+              if (edu) ui.row('Learn & Explore', edu.results, 'homeRows', 'tv');
+
+              // ------------------------------------------
+              // 9. ADVENTURE FOR KIDS (Unchanged)
+              // ------------------------------------------
+              const adventure = await api.get('/discover/movie', {
+                with_genres: "12",
+                certification_country: "US",
+                certification_lte: "PG"
+              });
+              if (adventure) ui.row('Adventure for Kids', adventure.results, 'homeRows', 'movie');
+
+              // ------------------------------------------
+              // 10. COMEDY FOR KIDS (Unchanged)
+              // ------------------------------------------
+              const comedy = await api.get('/discover/movie', {
+                with_genres: "35",
+                certification_country: "US",
+                certification_lte: "PG"
+              });
+              if (comedy) ui.row('Laugh & Smile', comedy.results, 'homeRows', 'movie');
+
+              // ------------------------------------------
+              // 11. ANIMATED TV SERIES (Unchanged)
+              // ------------------------------------------
+              const kidsTv = await api.get('/discover/tv', {
+                with_genres: "16,10751",
+                sort_by: "popularity.desc",
+                certification_country: "US",
+                certification_lte: "TV-Y7"
+              });
+              if (kidsTv) ui.row('Cartoons & Fun', kidsTv.results, 'homeRows', 'tv');
+
+              // ------------------------------------------
+              // 12. NATIONAL GEOGRAPHIC (Nature & Science)
+              // ------------------------------------------
+              const natGeo = await api.get('/discover/tv', {
+                with_companies: "16947,7521", // National Geographic Television, Nat Geo Wild
+                with_genres: "99", // Documentary
+                certification_lte: "TV-PG" // Allow for slightly older kids documentaries
+              });
+              if (natGeo) ui.row('National Geographic Explore', natGeo.results, 'homeRows', 'tv');
+
+              // ------------------------------------------
+              // 13. BBC CHILDREN'S (CBeebies/CBBC)
+              // ------------------------------------------
+              const bbcKids = await api.get('/discover/tv', {
+                with_networks: "26,1130,5780" // BBC (26), CBeebies (1130), CBBC (5780)
+              });
+              if (bbcKids) ui.row('BBC Kids Shows', bbcKids.results, 'homeRows', 'tv');
+
+              // ------------------------------------------
+              // 14. PBS KIDS (Educational US TV)
+              // ------------------------------------------
+              const pbsKids = await api.get('/discover/tv', {
+                with_networks: "32", // PBS (Public Broadcasting Service)
+                certification_country: "US",
+                certification_lte: "TV-Y" // Focused on the youngest audience
+              });
+              if (pbsKids) ui.row('PBS Educational', pbsKids.results, 'homeRows', 'tv');
+
+              // ------------------------------------------
+              // B. MENU LOCKDOWN (Keep Only Kids Safe) - (Unchanged)
+              // ------------------------------------------
+
+              // Hide dangerous menu links (Trending, Originals, etc)
+              document.querySelectorAll('.fs-link').forEach(link => {
+                if (
+                  link.innerText.includes('Originals') ||
+                  link.innerText.includes('Trending') ||
+                  link.innerText.includes('Top Rated')
+                ) {
+                  link.style.display = 'none';
+                }
+              });
+
+              // Replace Sidebar Genres with Safe Ones
+              const gList = document.getElementById("genreList");
+              gList.innerHTML = '';
+
+              const safeGenres = [
+                { id: 16, name: "Animation" },
+                { id: 10751, name: "Family" },
+                { id: 12, name: "Adventure" },
+                { id: 14, name: "Fantasy" },
+                { id: 35, name: "Comedy" },
+                { id: 10402, name: "Music" }
+              ];
+
+              safeGenres.forEach(g => {
+                const el = document.createElement('div');
+                el.className = 'genre-tag';
+                el.innerText = g.name;
+                el.onclick = () => {
+                  app.toggleSidebar(false);
+                  app.go('network', {
+                    id: g.id,
+                    name: g.name,
+                    type: 'genre'
+                  });
+                };
+                gList.appendChild(el);
+              });
+            }
+            else {
+              // ===============================================
+              // ADULT MODE: FULL CONTENT LIBRARY
+              // ===============================================
+              console.log("Loading Adult Content...");
+
+              // 1. Restore Sidebar & Search Links
+              document.querySelectorAll('.fs-link').forEach(l => l.style.display = 'block');
+
+              // 2. HERO & SPOTLIGHT (Using Trending)
+              const trending = await api.get('/trending/movie/week');
+              if (trending && trending.results.length) {
+                app.renderHero(trending.results[0]); // #1 Movie
+                if (trending.results.length > 1) app.renderSpotlight(trending.results[1]); // #2 Movie
+              }
+
+              // 3. GENERATE ROWS (The "Netflix" Experience)
+
+              // Row 1: Global Trends
+              ui.row('Trending Now', trending.results, 'homeRows', 'movie');
+
+              // Row 2: TV Shows
+              const trendingTv = await api.get('/trending/tv/week');
+              if (trendingTv) ui.row('Binge-Worthy TV', trendingTv.results, 'homeRows', 'tv');
+
+              // Row 3: Action & Adventure
+              const action = await api.get('/discover/movie', { with_genres: "28,12", sort_by: "popularity.desc" });
+              if (action) ui.row('High Octane Action', action.results, 'homeRows', 'movie');
+
+              // Row 4: Sci-Fi & Fantasy
+              const scifi = await api.get('/discover/movie', { with_genres: "878,14", sort_by: "popularity.desc" });
+              if (scifi) ui.row('Sci-Fi & Cyberpunk', scifi.results, 'homeRows', 'movie');
+
+              // Row 5: Horror (The stuff hidden from kids)
+              const horror = await api.get('/discover/movie', { with_genres: "27", sort_by: "popularity.desc" });
+              if (horror) ui.row('Late Night Chills', horror.results, 'homeRows', 'movie');
+
+              // Row 6: Comedy
+              const comedy = await api.get('/discover/movie', { with_genres: "35", sort_by: "popularity.desc" });
+              if (comedy) ui.row('Comedy Hits', comedy.results, 'homeRows', 'movie');
+
+              // Row 7: Top Rated Classics
+              const topRated = await api.get('/movie/top_rated', { region: 'US' });
+              if (topRated) ui.row('Critics Favorites', topRated.results, 'homeRows', 'movie');
+
+              // Row 8: Documentaries
+              const docs = await api.get('/discover/movie', { with_genres: "99", sort_by: "popularity.desc" });
+              if (docs) ui.row('Real Stories', docs.results, 'homeRows', 'movie');
+
+              // 4. RESTORE ADULT GENRES IN SIDEBAR
+              const allGenres = [
+                { id: 28, name: 'Action' }, { id: 12, name: 'Adventure' }, { id: 35, name: 'Comedy' },
+                { id: 80, name: 'Crime' }, { id: 18, name: 'Drama' }, { id: 14, name: 'Fantasy' },
+                { id: 27, name: 'Horror' }, { id: 878, name: 'Sci-Fi' }, { id: 53, name: 'Thriller' },
+                { id: 10749, name: 'Romance' }, { id: 9648, name: 'Mystery' }, { id: 37, name: 'Western' }
+              ];
+
+              const gList = document.getElementById("genreList");
+              gList.innerHTML = '';
+              allGenres.forEach(g => {
+                const el = document.createElement('div');
+                el.className = 'genre-tag';
+                el.innerText = g.name;
+                el.onclick = () => {
+                  app.toggleSidebar(false);
+                  app.go('network', { id: g.id, name: g.name, type: 'genre' });
+                };
+                gList.appendChild(el);
+              });
+
+              // Load "Originals" (Global View Count Leaderboard)
+              app.loadOriginals();
+            }
+
+            // Load Providers and Originals
+            app.renderHomeProviders();
+            // Only load global leaderboard if NOT kids (optional, usually originals are mixed ratings)
+            if (!isKids) app.loadOriginals();
           },
+
+
+          // ==========================================
+          // LOGOUT CALLBACK
+          // ==========================================
           () => {
-            // USER LOGGED OUT
+            console.log("User logged out.");
             app.state.user = null;
-            app.state.watchlist = []; // Clear list on logout
+            app.state.watchlist = [];
             app.renderWatchlist();
 
+            // Clear Profile Data from LocalStorage
+            // This ensures the Gate appears again on next login
+            localStorage.removeItem('aether_active_profile');
+            localStorage.removeItem('aether_is_kids');
+            localStorage.removeItem('aether_theme');
+
+            // Reset UI visibility
+            document.querySelector('nav').style.display = 'none';
+            document.querySelector('main').style.display = 'none';
+            document.getElementById('profileGateView').classList.remove('active');
+            document.getElementById('profileGateView').style.display = 'none';
+
+            // Show Auth Screen
             const authView = document.getElementById('view-auth');
             authView.style.display = 'flex';
             gsap.to(authView, { opacity: 1, y: 0, duration: 0.5 });
@@ -1066,18 +2563,70 @@
           document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
         });
 
-        // Genres
-        const genres = [
-          { id: 28, name: 'Action' }, { id: 12, name: 'Adventure' }, { id: 35, name: 'Comedy' }, { id: 80, name: 'Crime' },
-          { id: 18, name: 'Drama' }, { id: 14, name: 'Fantasy' }, { id: 27, name: 'Horror' }, { id: 878, name: 'Sci-Fi' }, { id: 53, name: 'Thriller' }
-        ];
-        const gList = document.getElementById('genreList');
+        const isKids = localStorage.getItem('aether_is_kids') === 'true';
+
+        if (isKids) {
+          // 1. KIDS HOME PAGE
+          // Fetch Family & Animation specifically
+          const kidsMovies = await api.get('/discover/movie', { with_genres: "16,10751", sort_by: "popularity.desc" });
+
+          if (kidsMovies.results?.length) {
+            app.renderHero(kidsMovies.results[0]); // Safe Hero
+            if (kidsMovies.results[1]) app.renderSpotlight(kidsMovies.results[1]);
+          }
+
+          ui.row('Popular Animation', kidsMovies.results, 'homeRows', 'movie');
+
+          const disney = await api.get('/discover/movie', { with_companies: 2 }); // Disney ID
+          ui.row('Disney Favorites', disney.results, 'homeRows', 'movie');
+
+          // 2. Hide Unsafe Elements
+          // Hide "Originals" tab link as it's uncontrolled
+          document.querySelectorAll('.fs-link').forEach(link => {
+            if (link.innerText.includes('Originals')) link.style.display = 'none';
+          });
+
+        } else {
+          // 1. STANDARD HOME PAGE (Existing code)
+          const trending = await api.get('/trending/movie/week');
+          if (trending && trending.results?.length) {
+            app.renderHero(trending.results[0]);
+            if (trending.results.length > 1) app.renderSpotlight(trending.results[1]);
+          }
+          if (trending) ui.row('Trending Movies', trending.results, 'homeRows', 'movie');
+
+          const action = await api.get('/discover/movie', { with_genres: 28 });
+          if (action) ui.row('Adrenaline Rush', action.results, 'homeRows', 'movie');
+        }
+
+        app.renderHomeProviders();
+
+        // 3. LOAD GENRES (Conditional)
+        const gList = document.getElementById("genreList");
+        gList.innerHTML = '';
+
+        let genres = [];
+        if (isKids) {
+          genres = [
+            { id: 16, name: "Animation" },
+            { id: 10751, name: "Family" },
+            { id: 12, name: "Adventure" },
+            { id: 35, name: "Comedy" },
+            { id: 14, name: "Fantasy" }
+          ];
+        } else {
+          genres = [
+            { id: 28, name: 'Action' }, { id: 12, name: 'Adventure' }, { id: 35, name: 'Comedy' },
+            { id: 80, name: 'Crime' }, { id: 18, name: 'Drama' }, { id: 14, name: 'Fantasy' },
+            { id: 27, name: 'Horror' }, { id: 878, name: 'Sci-Fi' }, { id: 53, name: 'Thriller' }
+          ];
+        }
+
         genres.forEach(g => {
           const el = document.createElement('div'); el.className = 'genre-item'; el.innerText = g.name;
           el.onclick = () => { app.toggleSidebar(false); app.go('network', { id: g.id, name: g.name, type: 'genre' }); };
           gList.appendChild(el);
         });
-
         // --- FETCH DATA ---
         const trending = await api.get('/trending/movie/week');
         if (trending.results?.length) {
@@ -1109,23 +2658,49 @@
         document.getElementById('sidebarToggle').onclick = app.toggleSidebar;
         document.getElementById('searchInput').addEventListener('input', app.handleSearch);
       },
-
       // --- AUTH UI HANDLERS ---
       toggleAuthMode: (mode) => {
         const loginBox = document.getElementById('btnContainerLogin');
         const signupBox = document.getElementById('btnContainerSignup');
         const errorMsg = document.getElementById('authError');
 
-        errorMsg.style.display = 'none';
+        // Clear previous errors
+        if (errorMsg) errorMsg.style.display = 'none';
 
         if (mode === 'signup') {
-          gsap.to(loginBox, { height: 0, opacity: 0, overflow: 'hidden', duration: 0.3, onComplete: () => loginBox.style.display = 'none' });
-          signupBox.style.display = 'block';
-          gsap.fromTo(signupBox, { height: 0, opacity: 0 }, { height: 'auto', opacity: 1, duration: 0.3 });
+          // 1. Fade out Login
+          gsap.to(loginBox, {
+            opacity: 0,
+            y: -10,
+            duration: 0.3,
+            onComplete: () => {
+              loginBox.style.display = 'none';
+
+              // 2. Show Signup
+              signupBox.style.display = 'block';
+              gsap.fromTo(signupBox,
+                { opacity: 0, y: 10 },
+                { opacity: 1, y: 0, duration: 0.3 }
+              );
+            }
+          });
         } else {
-          gsap.to(signupBox, { height: 0, opacity: 0, overflow: 'hidden', duration: 0.3, onComplete: () => signupBox.style.display = 'none' });
-          loginBox.style.display = 'block';
-          gsap.fromTo(loginBox, { height: 0, opacity: 0 }, { height: 'auto', opacity: 1, duration: 0.3 });
+          // 1. Fade out Signup
+          gsap.to(signupBox, {
+            opacity: 0,
+            y: -10,
+            duration: 0.3,
+            onComplete: () => {
+              signupBox.style.display = 'none';
+
+              // 2. Show Login
+              loginBox.style.display = 'block';
+              gsap.fromTo(loginBox,
+                { opacity: 0, y: 10 },
+                { opacity: 1, y: 0, duration: 0.3 }
+              );
+            }
+          });
         }
       },
 
@@ -1143,17 +2718,44 @@
       },
 
       handleRegister: async () => {
-        const email = document.getElementById('authEmail').value;
-        const pass = document.getElementById('authPass').value;
-        const name = document.getElementById('authName').value;
-        const errorMsg = document.getElementById('authError');
+        try {
+          const email = document.getElementById('authEmail').value;
+          const pass = document.getElementById('authPass').value;
+          const name = document.getElementById('authName').value;
+          const errorMsg = document.getElementById('authError');
 
-        if (!name) { errorMsg.innerText = "Name required"; errorMsg.style.display = 'block'; return; }
+          // Validation
+          if (!email || !pass || !name) {
+            if (errorMsg) {
+              errorMsg.innerText = "All fields are required";
+              errorMsg.style.display = 'block';
+            }
+            return;
+          }
 
-        const res = await registerEmail(email, pass, name);
-        if (!res.success) {
-          errorMsg.innerText = res.error;
-          errorMsg.style.display = 'block';
+          if (pass.length < 6) {
+            if (errorMsg) {
+              errorMsg.innerText = "Password must be at least 6 characters";
+              errorMsg.style.display = 'block';
+            }
+            return;
+          }
+
+          const res = await registerEmail(email, pass, name);
+          if (!res.success) {
+            if (errorMsg) {
+              errorMsg.innerText = res.error || "Registration failed";
+              errorMsg.style.display = 'block';
+            }
+          }
+          // Success handled by auth observer
+        } catch (error) {
+          console.error('Registration error:', error);
+          const errorMsg = document.getElementById('authError');
+          if (errorMsg) {
+            errorMsg.innerText = error.message || "An error occurred";
+            errorMsg.style.display = 'block';
+          }
         }
       },
 
@@ -1167,36 +2769,202 @@
         // App state cleared by observer callback
       },
 
+      // 1. CHECK FOR VIOLATION
+      checkSafety: (query) => {
+        const isKids = localStorage.getItem('aether_is_kids') === 'true';
+        const isAdultSafety = localStorage.getItem('aether_adult_safety') === 'true';
+
+        if (isKids || isAdultSafety) {
+          // .some() stops as soon as it finds ONE match
+          const violation = RESTRICTED_TERMS.some(pattern => pattern.test(query));
+
+          if (violation) {
+            console.log("Blocked term:", query); // Debugging
+            app.triggerSecurityProtocol(); // Trigger the red screen
+            return false;
+          }
+        }
+        return true;
+      },
+
+      // 2. TRIGGER THE SCARE
+      triggerSecurityProtocol: () => {
+        const modal = document.getElementById('securityModal');
+        const input = document.getElementById('searchInput');
+
+        // Clear input immediately
+        if (input) {
+          input.value = "";
+          input.blur();
+        }
+
+        // Close Search Overlay
+        app.toggleSearch();
+
+        // Show Scary Modal
+        modal.classList.add('active');
+
+        // Optional: Play Error Sound
+        // const audio = new Audio('path/to/error.mp3'); audio.play();
+      },
+
+      // 3. CLOSE MODAL
+      closeSecurityModal: () => {
+        document.getElementById('securityModal').classList.remove('active');
+      },
+      /*
       updateProfileUI: (user) => {
         if (!user) return;
 
-        const nameInput = document.getElementById('settingsName');
-        const emailInput = document.getElementById('settingsEmail');
+        // Import the profile logic dynamically
+        import("./js/firebase/profiles.js").then(async ({ getAccountProfiles, setActiveProfile, getActiveProfileId, createProfile }) => {
 
-        if (nameInput) nameInput.value = user.displayName || 'Aether Traveler';
-        if (emailInput) emailInput.value = user.email || 'No Email Linked';
+          // 1. Fetch Profiles
+          const profiles = await getAccountProfiles(user.uid);
+          const activeId = getActiveProfileId();
 
-        // Update images
-        if (user.photoURL) {
-          document.querySelectorAll('.profile-img, .avatar-large img').forEach(img => {
-            img.src = user.photoURL;
+          // 2. Find Active Profile Data
+          // If no active profile (first login), default to the first one (Admin)
+          let currentPersona = profiles.find(p => p.id === activeId) || profiles[0];
+
+          // 3. Update UI with PERSONA Data (Not just Google Auth Data)
+          document.getElementById('settingsName').value = currentPersona.name;
+          document.getElementById('userPageName').innerText = currentPersona.name; // Update Profile Page too
+
+          // Update Avatars (Nav + Settings + Profile Page)
+          const newAvatar = currentPersona.avatar;
+          document.querySelectorAll('.profile-img, .avatar-large img, #userPageAvatar').forEach(img => {
+            img.src = newAvatar;
           });
 
-          // --- NEW: Highlight the correct avatar in the grid ---
-          const gridItems = document.querySelectorAll('.avatar-item img');
-          gridItems.forEach(img => {
-            if (img.src === user.photoURL) {
-              // Remove selected from others
-              document.querySelectorAll('.avatar-item').forEach(i => i.classList.remove('selected'));
-              // Add to this parent
-              img.parentElement.classList.add('selected');
+          // 4. Render Switcher List in Settings
+          const container = document.getElementById('settingsProfilesList');
+          if (container) {
+            container.innerHTML = '';
+
+            // A. List Existing Profiles
+            profiles.forEach(p => {
+              const div = document.createElement('div');
+              div.className = `profile-pill-item ${p.id === activeId ? 'active' : ''}`;
+              // Add Kids Badge if applicable
+              const badge = p.isKids ? '<span style="font-size:9px; background:#fff; color:#000; padding:2px 4px; border-radius:4px; margin-left:5px;">KIDS</span>' : '';
+
+              div.innerHTML = `
+                        <img src="${p.avatar}" class="profile-pill-img" style="border: 2px solid ${p.isKids ? '#00ffff' : 'transparent'}">
+                        <span class="profile-pill-name">${p.name} ${badge}</span>
+                    `;
+
+              div.onclick = () => {
+                if (p.id !== activeId) {
+                  if (confirm(`Switch to ${p.name}?`)) setActiveProfile(p);
+                }
+              };
+              container.appendChild(div);
+            });
+
+            // B. Add "Create Kids Profile" Button (if not maxed out)
+            if (profiles.length < 5) {
+              const addBtn = document.createElement('div');
+              addBtn.className = 'profile-pill-item';
+              addBtn.style.borderStyle = 'dashed';
+              addBtn.innerHTML = `<i class="fas fa-plus" style="color:#00ffff"></i> <span style="color:#00ffff">Add Kid</span>`;
+
+              addBtn.onclick = async () => {
+                const name = prompt("Name for Kids Profile:");
+                if (name) {
+                  await createProfile(
+                    user.uid,
+                    name,
+                    "https://img.freepik.com/free-vector/cute-astronaut-dance-cartoon-vector-icon-illustration-technology-science-icon-concept-isolated-premium-vector-flat-cartoon-style_138676-3851.jpg", // Kids Avatar
+                    "light", // Light theme for kids
+                    true // isKids = true
+                  );
+                  // Refresh UI
+                  app.updateProfileUI(user);
+                }
+              };
+              container.appendChild(addBtn);
             }
+          }
+        });
+      },*/
+
+
+      updateProfileUI: (user) => {
+        if (!user) return;
+
+        // Import profile logic
+        import("./js/firebase/profiles.js").then(async ({ getAccountProfiles, setActiveProfile, getActiveProfileId }) => {
+
+          // 1. Fetch Profiles
+          const profiles = await getAccountProfiles(user.uid);
+          const activeId = getActiveProfileId();
+
+          // 2. Find Active Profile Data
+          let currentPersona = profiles.find(p => p.id === activeId) || profiles[0];
+
+          // 3. Update Current User UI (Sidebar, Header, etc)
+          document.getElementById('settingsName').value = currentPersona.name;
+          document.getElementById('userPageName').innerText = currentPersona.name;
+          const newAvatar = currentPersona.avatar;
+          document.querySelectorAll('.profile-img, .avatar-large img, #userPageAvatar').forEach(img => {
+            img.src = newAvatar;
           });
-        }
+
+          // 4. Render Switcher List in Settings
+          const container = document.getElementById('settingsProfilesList');
+          if (container) {
+            container.innerHTML = '';
+
+            // A. List Existing Profiles
+            profiles.forEach(p => {
+              const div = document.createElement('div');
+              div.className = `profile-pill-item ${p.id === activeId ? 'active' : ''}`;
+
+              // Add Badge if Kid
+              const badge = p.isKids ? '<span style="font-size:9px; background:#00ffff; color:#000; padding:2px 4px; border-radius:4px; margin-left:5px; font-weight:bold;">KIDS</span>' : '';
+
+              div.innerHTML = `
+            <img src="${p.avatar}" class="profile-pill-img" style="border: 2px solid ${p.isKids ? '#00ffff' : 'transparent'}">
+            <span class="profile-pill-name">${p.name} ${badge}</span>
+        `;
+
+              div.onclick = () => {
+                if (p.id !== activeId) {
+                  // Switch Profile
+                  if (confirm(`Switch to ${p.name}?`)) setActiveProfile(p);
+                }
+              };
+              container.appendChild(div);
+            });
+
+            // B. Dynamic "Add Profile" Button (Limit 5)
+            if (profiles.length < 5) {
+              const addBtn = document.createElement('div');
+              addBtn.className = 'profile-pill-item';
+              addBtn.style.borderStyle = 'dashed';
+              addBtn.style.opacity = '0.7';
+
+              // Generic "Add" Icon
+              addBtn.innerHTML = `<i class="fas fa-plus" style="color:#fff"></i> <span style="color:#fff">Add</span>`;
+
+              addBtn.onclick = () => {
+                // Close Settings Panel
+                // (Optional: app.go('home') or close settings)
+
+                // OPEN THE MODAL (Allows choosing Adult or Kid)
+                window.profileGateUI.openAddModal();
+              };
+              container.appendChild(addBtn);
+            }
+
+
+          }
+        });
       },
 
       // --- AVATAR SELECTION LOGIC ---
-      selectAvatar: async (el) => {
+      /*selectAvatar: async (el) => {
         // 1. UI: Handle Selection Classes
         const grid = document.getElementById('avatarGrid');
         const items = grid.querySelectorAll('.avatar-item');
@@ -1234,6 +3002,33 @@
         } else {
           // Fallback for non-logged-in users (Session only)
           localStorage.setItem('temp_avatar', newSrc);
+        }
+      },*/
+
+      selectAvatar: async (el) => {
+        // UI Update
+        document.querySelectorAll(".avatar-item").forEach(i => i.classList.remove("selected"));
+        el.classList.add("selected");
+
+        // Get Image URL
+        const src = el.querySelector("img").src;
+
+        // Update Visuals Immediately
+        document.querySelectorAll(".profile-img, .avatar-large img, #profileAvatar").forEach(img => img.src = src);
+
+        if (app.state.user) {
+          // A. Update Firebase Auth (Session)
+          try {
+            await updateProfile(getAuth().currentUser, { photoURL: src });
+          } catch (e) { console.error("Auth Update Error", e); }
+
+          // B. Update Firestore (Database - What friends see)
+          // THIS WAS MISSING
+          await updateUserProfile(app.state.user.uid, { photoURL: src });
+
+          console.log("Avatar saved to database.");
+        } else {
+          localStorage.setItem('temp_avatar', src);
         }
       },
       // --- EXISTING FUNCTIONALITY BELOW ---
@@ -1273,7 +3068,7 @@
           saveUserSettings(app.state.user, { theme: newTheme });
         }
       },
-      renderHero: (m) => {
+      /*renderHero: (m) => {
         document.getElementById('heroBg').src = IMG_BASE + m.backdrop_path;
         document.getElementById('heroTitle').innerText = m.title || m.name;
         document.getElementById('heroDesc').innerText = m.overview.substring(0, 180) + '...';
@@ -1303,7 +3098,73 @@
         listBtn.onclick = () => app.toggleWatchlist(m);
         app.updateListBtn(listBtn, m.id);
         gsap.to('#heroBg', { yPercent: 20, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } });
+      },*/
+
+      renderHero: (m) => {
+        // 1. Basic Info
+        document.getElementById('heroBg').src = IMG_BASE + m.backdrop_path;
+        document.getElementById('heroTitle').innerText = m.title || m.name;
+        document.getElementById('heroDesc').innerText = m.overview.substring(0, 180) + '...';
+
+        // 2. Trailer Button (Hardcoded in HTML)
+        const playBtn = document.getElementById('heroPlayBtn');
+        playBtn.onclick = () => app.playVideo(m.id, m.media_type || 'movie', m.title || m.name);
+
+        // 3. Dynamic Buttons Container
+        const heroContent = document.querySelector('.hero-content div[style="display:flex; gap:16px;"]');
+        const listBtn = document.getElementById('heroListBtn');
+
+        // --- A. STREAM BUTTON ---
+        const oldStreamBtn = document.getElementById('heroStreamBtn');
+        if (oldStreamBtn) oldStreamBtn.remove();
+
+        const streamBtn = document.createElement('button');
+        streamBtn.id = 'heroStreamBtn';
+        streamBtn.className = 'btn btn-primary magnetic';
+        streamBtn.innerHTML = `<i class="fas fa-play"></i> Watch Now`;
+        streamBtn.style.background = 'var(--accent)';
+        streamBtn.style.color = '#fff';
+        streamBtn.style.border = 'none';
+
+        streamBtn.onclick = async () => {
+          const fullData = await api.get(`/${m.media_type || 'movie'}/${m.id}`, { append_to_response: 'external_ids' });
+          player.open(fullData);
+        };
+
+        // --- B. WATCH PARTY BUTTON (NEW) ---
+        const oldPartyBtn = document.getElementById('heroPartyBtn');
+        if (oldPartyBtn) oldPartyBtn.remove();
+
+        const partyBtn = document.createElement('button');
+        partyBtn.id = 'heroPartyBtn';
+        partyBtn.className = 'btn btn-blur magnetic';
+        partyBtn.innerHTML = `<i class="fas fa-users"></i> Watch Party`;
+        partyBtn.style.border = '1px solid var(--accent)';
+        partyBtn.style.color = 'var(--accent)';
+
+        partyBtn.onclick = async () => {
+          if (window.watchPartyUI) {
+            // Pass full object with absolute image path
+            const movieData = { ...m, poster_path: POSTER_BASE + m.poster_path };
+            await window.watchPartyUI.watchMovie(movieData);
+          } else {
+            alert("Party system loading...");
+          }
+        };
+
+        // --- C. INSERTION ---
+        // Order: [Trailer] [Stream] [Party] [My List]
+        heroContent.insertBefore(streamBtn, listBtn);
+        heroContent.insertBefore(partyBtn, listBtn);
+
+        // 4. List Button Logic
+        listBtn.onclick = () => app.toggleWatchlist(m);
+        app.updateListBtn(listBtn, m.id);
+
+        // 5. Parallax Animation
+        gsap.to('#heroBg', { yPercent: 20, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } });
       },
+
 
       renderSpotlight: async (m) => {
         if (!m) return;
@@ -1444,7 +3305,7 @@
         }, 40000);
       },
 
-      renderHomeProviders: async () => {
+      /*renderHomeProviders: async () => {
         // 1. Define the Priority Networks we want to show (IDs from TMDB)
         // 8: Netflix, 337: Disney+, 9: Amazon Prime, 350: Apple TV+, 15: Hulu, 1899: Max, 283: Crunchyroll
         //const priorityIds = [8, 337, 9, 350, 15, 1899, 283];
@@ -1523,6 +3384,7 @@
           });
         }
       },
+
       toggleProviderGrid: async (shouldOpen) => {
         const ov = document.getElementById('providerOverlay');
         const grid = document.getElementById('providerGrid');
@@ -1562,7 +3424,262 @@
         app.state.visibleProvidersCount += slice.length;
         gsap.from(newCards, { y: 30, opacity: 0, scale: 0.95, duration: 0.45, stagger: 0.05, clearProps: "all" });
         btn.style.display = (app.state.visibleProvidersCount >= app.state.allProviders.length) ? 'none' : 'block';
+      },*/
+
+
+      renderHomeProviders: async () => {
+        const isKids = localStorage.getItem('aether_is_kids') === 'true';
+
+        // 1. Define Priority Lists
+        let priorityIds = [];
+        let sectionTitle = "Partners";
+
+        if (isKids) {
+          // --- KIDS CURATION ---
+          priorityIds = [
+            337,   // Disney+ (قناة الأطفال)
+            1899,  // Paramount+ (نيكلوديون)
+            8,     // Netflix (فلترة ستعمل في الواجهة التالية)
+            531,   // Peacock (دريم ووركس)
+            350,   // Apple TV+ (سنوبي)
+            567,   // PBS Kids (تعليمي)
+            432,   // Noggin/Nick Jr.
+            289,   // Boomerang (كرتون كلاسيكي)
+            654    // Kidoodle.TV (آمن للأطفال)
+          ];
+          sectionTitle = "Kids Channels";
+
+        } else {
+          // --- ADULT / STANDARD CURATION ---
+          priorityIds = [
+            8,     // Netflix
+            9,     // Amazon Prime Video
+            337,   // Disney+
+            350,   // Apple TV+
+            1899,  // Paramount+
+            15,    // Hulu
+            531,   // Peacock
+            384,   // DAZN
+            247,   // Shudder
+            443,   // AMC+
+            27,    // Viaplay
+            387,   // Max
+            283,   // Crunchyroll
+            192,   // YouTube
+            2      // Apple iTunes
+          ];
+        }
+
+        // 2. Fetch Global Providers
+        const res = await api.get('/watch/providers/movie', { watch_region: 'US' });
+
+        if (res.results) {
+          const track = document.getElementById('homeProviders');
+          track.innerHTML = '';
+
+          // Update section title
+          const label = document.querySelector('.providers-wrap span');
+          if (label) label.innerText = sectionTitle;
+
+          // 3. Filter & Sort based on the list defined above
+          const networks = res.results
+            .filter(p => priorityIds.includes(p.provider_id))
+            .sort((a, b) => priorityIds.indexOf(a.provider_id) - priorityIds.indexOf(b.provider_id));
+
+          networks.forEach(p => {
+            const d = document.createElement('div');
+            d.className = 'provider-pill';
+
+            const logoUrl = p.logo_path
+              ? `https://media.themoviedb.org/t/p/h60${p.logo_path}`
+              : 'fallback.png';
+
+            d.innerHTML = `<img src="${logoUrl}" class="provider-logo" alt="${p.name}">`;
+
+            // عند النقر: نفتح واجهة الشبكة مع فلترة محتوى الأطفال
+            d.onclick = () => {
+              if (isKids) {
+                // إنشاء فلتر محتوى آمن للأطفال
+                const kidsFilter = {
+                  certification_country: 'US',
+                  certification: KIDS_AGE_RATINGS.join('|'),
+                  with_genres: KIDS_CONTENT_TYPES.join(','),
+                  include_adult: false,
+                  include_video: false
+                };
+
+                app.go('network', {
+                  id: p.provider_id,
+                  name: p.provider_name,
+                  type: 'provider',
+                  filter: kidsFilter,
+                  isKids: true
+                });
+              } else {
+                app.go('network', {
+                  id: p.provider_id,
+                  name: p.provider_name,
+                  type: 'provider'
+                });
+              }
+            };
+
+            track.appendChild(d);
+          });
+        }
       },
+
+      toggleProviderGrid: async (shouldOpen) => {
+        const ov = document.getElementById('providerOverlay');
+        const grid = document.getElementById('providerGrid');
+        const isKids = localStorage.getItem('aether_is_kids') === 'true';
+
+        gsap.killTweensOf(ov);
+
+        if (shouldOpen) {
+          ov.style.display = 'block';
+          ov.style.opacity = 0;
+          await gsap.to(ov, { opacity: 1, duration: 0.35, ease: "power2.out" });
+
+          // تحديث عنوان الشبكة
+          const gridTitle = document.querySelector('#providerOverlay .grid-title');
+          if (gridTitle) {
+            gridTitle.innerText = isKids ? "Kids Channels" : "All Channels";
+          }
+
+          // نعيد تحميل المحتوى دائماً للتأكد من المزامنة
+          grid.innerHTML = `<div style="color:var(--text); text-align:center; grid-column:1/-1; padding:40px;">
+      ${isKids ? "Loading safe kids channels..." : "Loading all channels..."}
+    </div>`;
+
+          const res = await api.get('/watch/providers/movie', { watch_region: 'US' });
+          if (res.results) {
+            // فلترة المنصات حسب وضع الأطفال
+            let providers = res.results;
+
+            if (isKids) {
+              // فلترة مزدوجة: 1. منصات موصى بها 2. مع فلترة محتوى
+              const recommendedKidsProviders = [
+                337, 1899, 8, 531, 350, 567, 432, 289, 654, 721
+              ];
+              providers = providers.filter(p =>
+                recommendedKidsProviders.includes(p.provider_id)
+              );
+            }
+
+            app.state.allProviders = providers.sort((a, b) => a.display_priority - b.display_priority);
+            grid.innerHTML = '';
+            app.state.visibleProvidersCount = 0;
+            app.renderProviderBatch();
+          }
+        } else {
+          await gsap.to(ov, {
+            opacity: 0,
+            duration: 0.25,
+            onComplete: () => ov.style.display = 'none'
+          });
+        }
+      },
+
+      renderProviderBatch: () => {
+        const isKids = localStorage.getItem('aether_is_kids') === 'true';
+
+        const slice = app.state.allProviders.slice(
+          app.state.visibleProvidersCount,
+          app.state.visibleProvidersCount + 24
+        );
+
+        const grid = document.getElementById('providerGrid');
+        const btn = document.getElementById('providerLoadMoreBtn');
+
+        if (slice.length === 0) {
+          if (app.state.visibleProvidersCount === 0) {
+            grid.innerHTML = `<div style="color:var(--text); text-align:center; grid-column:1/-1; padding:40px;">
+        ${isKids ? "No kids channels available" : "No channels available"}
+      </div>`;
+          }
+          btn.style.display = 'none';
+          return;
+        }
+
+        const newCards = [];
+        slice.forEach(p => {
+          const el = document.createElement('div');
+          el.className = 'provider-card-lg';
+          el.innerHTML = `
+      <img src="${LOGO_BASE}${p.logo_path}" loading="lazy" alt="${p.provider_name}">
+      <div class="provider-name">${p.provider_name}</div>
+    `;
+
+          el.onclick = () => {
+            app.toggleProviderGrid(false);
+
+            if (isKids) {
+              // فلترة محتوى الأطفال عند النقر
+              const kidsFilter = {
+                certification_country: 'US',
+                certification: KIDS_AGE_RATINGS.join('|'),
+                with_genres: KIDS_CONTENT_TYPES.join(','),
+                include_adult: false,
+                include_video: false,
+                'vote_average.gte': 0,
+                'vote_average.lte': 10
+              };
+
+              app.go('network', {
+                id: p.provider_id,
+                name: p.provider_name,
+                type: 'provider',
+                filter: kidsFilter,
+                isKids: true
+              });
+            } else {
+              app.go('network', {
+                id: p.provider_id,
+                name: p.provider_name,
+                type: 'provider'
+              });
+            }
+          };
+
+          grid.appendChild(el);
+          newCards.push(el);
+        });
+
+        app.state.visibleProvidersCount += slice.length;
+        gsap.from(newCards, {
+          y: 30,
+          opacity: 0,
+          scale: 0.95,
+          duration: 0.45,
+          stagger: 0.05,
+          clearProps: "all"
+        });
+
+        btn.style.display = (app.state.visibleProvidersCount >= app.state.allProviders.length) ? 'none' : 'block';
+      },
+
+      // دالة مساعدة لفحص محتوى الأطفال
+      checkIfContentIsKidFriendly: (content) => {
+        const isKids = localStorage.getItem('aether_is_kids') === 'true';
+
+        if (!isKids) return true; // إذا لم يكن وضع الأطفال مفعلاً
+
+        // فحص التصنيف العمري
+        const ageRating = content.certification || content.rating || '';
+        if (ageRating && KIDS_AGE_RATINGS.includes(ageRating)) {
+          return true;
+        }
+
+        // فحص الأنواع
+        const genres = content.genres || [];
+        const hasKidFriendlyGenre = genres.some(genre =>
+          KIDS_CONTENT_TYPES.includes(genre.name)
+        );
+
+        return hasKidFriendlyGenre;
+      },
+
 
       go: async (view, params = null) => {
         app.toggleSidebar(false);
@@ -1578,148 +3695,627 @@
         if (view === 'detail') await app.loadDetail(params);
         if (view === 'network') await app.initNetworkView(params);
         if (view === 'watchlist') app.renderWatchlist();
+        if (view === 'constellation') {
+          // No specific load function needed here, handled by openConstellation
+        }
         // NEW VIEWS
         if (view === 'originals') await app.loadOriginals();
-        if (view === 'profile') app.loadProfile();
+        if (view === 'profile') await app.loadProfile();
         const closeBtn = document.getElementById('closeViewBtn');
         if (view === 'home') closeBtn.classList.remove('active');
         else closeBtn.classList.add('active');
         setTimeout(() => { target.style.display = 'block'; target.classList.add('active'); anim.pageTrans(`view-${view}`); }, 300);
       },
 
-      loadDetail: async (params) => {
-        const { id, type } = params;
-        const endpoint = type === 'tv' ? `/tv/${id}` : `/movie/${id}`;
-        const m = await api.get(endpoint, { append_to_response: 'external_ids' });
-        //const m = await api.get(endpoint);
-        const credits = await api.get(`${endpoint}/credits`);
-        const recs = await api.get(`${endpoint}/recommendations`);
 
-        m.media_type = type;
+      /*loadDetail: async (params) => {
+        const { id, type } = params;
+        const m = await api.get(`/${type}/${id}`, { append_to_response: "external_ids,credits,recommendations" });
         app.state.currentMedia = m;
 
-        // 1. Populate Basic Info
-        document.getElementById('dtBackdrop').src = IMG_BASE + m.backdrop_path;
-        document.getElementById('dtPoster').src = POSTER_BASE + m.poster_path;
-        document.getElementById('dtTitle').innerText = m.title || m.name;
-        document.getElementById('dtDesc').innerText = m.overview;
+        //(Basic Info Population: Title, Desc, Backdrop - KEEP EXISTING) ...
+        document.getElementById("dtBackdrop").src = IMG_BASE + m.backdrop_path;
+        document.getElementById("dtPoster").src = POSTER_BASE + m.poster_path;
+        document.getElementById("dtTitle").innerText = m.title || m.name;
+        document.getElementById("dtDesc").innerText = m.overview;
+        document.getElementById("dtYear").innerText = (m.release_date || m.first_air_date || '').split('-')[0];
+        document.getElementById("dtRuntime").innerText = type === 'movie' ? (m.runtime + 'm') : (m.number_of_seasons + ' Seasons');
 
-        const date = m.release_date || m.first_air_date;
-        document.getElementById('dtYear').innerText = date ? date.split('-')[0] : 'N/A';
+        // --- 1. CHECK USER STATE (Favorite & Rating) ---
+        const user = app.state.user;
+        const favBtn = document.getElementById("dtFavBtn");
+        const stars = document.querySelectorAll('#dtUserRating .star-btn');
 
-        const runtimeEl = document.getElementById('dtRuntime');
-        if (type === 'tv') {
-          runtimeEl.innerText = `${m.number_of_seasons} Seasons • ${m.number_of_episodes} Eps`;
-        } else {
-          runtimeEl.innerText = m.runtime ? `${Math.floor(m.runtime / 60)}h ${m.runtime % 60}m` : 'N/A';
+        // Reset UI
+        favBtn.classList.remove('active');
+        stars.forEach(s => s.classList.remove('filled'));
+
+        if (user) {
+          // Check Favorites (We need to fetch user profile to know)
+          const userData = await getUserData(user);
+          const isFav = (userData.favorites || []).some(f => f.id === m.id);
+          if (isFav) favBtn.classList.add('active');
+
+          // Check Rating
+          const myRating = await getUserRating(user, m.id);
+          if (myRating > 0) {
+            stars.forEach((s, idx) => {
+              if (idx < myRating) s.classList.add('filled');
+            });
+          }
         }
 
-        // 2. Buttons
-        const playBtn = document.getElementById('dtPlayBtn');
-        playBtn.onclick = () => app.playVideo(m.id, type, m.title || m.name);
+        // --- 2. BIND EVENTS ---
 
-        // FIND THE BUTTON CONTAINER
-        const btnContainer = document.querySelector('#view-detail .detail-info div[style="display:flex; gap:16px; margin-bottom:50px;"]');
+        // Favorite Click
+        favBtn.onclick = () => app.toggleFavorite(m, favBtn);
 
-        // Remove old stream button if exists (to prevent duplicates)
-        const oldBtn = document.getElementById('dtStreamBtn');
+        // Star Click
+        stars.forEach(star => {
+          star.onclick = () => {
+            const val = parseInt(star.getAttribute('data-val'));
+            app.setUserRating(m, val);
+          };
+        });
+
+        // ... (Buttons: Play, List, Stream - KEEP EXISTING LOGIC) ...
+        document.getElementById("dtPlayBtn").onclick = () => app.playVideo(m.id, type, m.title || m.name);
+
+        const container = document.querySelector('#view-detail .detail-info div[style="display:flex; align-items:center; gap:16px; margin-bottom:50px;"]');
+
+        // Stream Button Logic (Ensure no duplicates)
+        const oldBtn = document.getElementById("dtStreamBtn");
         if (oldBtn) oldBtn.remove();
+        const sBtn = document.createElement("button");
+        sBtn.id = "dtStreamBtn";
+        sBtn.className = "btn btn-primary magnetic";
+        sBtn.innerHTML = `<i class="fas fa-play"></i> Start Stream`;
+        sBtn.style.background = "var(--accent)";
+        sBtn.style.border = "none";
+        sBtn.onclick = () => player.open(m);
 
-        // Create Stream Button
-        const streamBtn = document.createElement('button');
-        streamBtn.id = 'dtStreamBtn';
-        streamBtn.className = 'btn btn-primary magnetic';
-        streamBtn.innerHTML = `<i class="fas fa-play"></i> Start Streaming`;
-        streamBtn.style.background = 'var(--accent)';
-        streamBtn.style.color = '#fff';
-        streamBtn.style.border = 'none';
+        // Insert correctly in the row
+        container.insertBefore(sBtn, document.getElementById("dtListBtn"));
 
-        // Insert before "Add to List"
-        btnContainer.insertBefore(streamBtn, document.getElementById('dtListBtn'));
+        const lBtn = document.getElementById("dtListBtn");
+        lBtn.onclick = () => app.toggleWatchlist(m);
+        app.updateListBtn(lBtn, m.id);
 
-        streamBtn.onclick = () => {
-          player.open(m, null, null); // Movie
-        };
-
-        const listBtn = document.getElementById('dtListBtn');
-        listBtn.onclick = () => app.toggleWatchlist(m);
-        app.updateListBtn(listBtn, m.id);
-
-        // 3. SEASONS LOGIC (Updated)
-        const seasonContainer = document.getElementById('seasonContainer');
-        const seasonList = document.getElementById('dtSeasons');
-        const dtEpisodes = document.getElementById('dtEpisodes');
-        const epHeader = document.getElementById('episodesHeader');
-
-        // Reset areas
-        seasonList.innerHTML = '';
-        dtEpisodes.innerHTML = '';
-        epHeader.style.display = 'none';
+        // ... (Seasons, Cast, Recs - KEEP EXISTING LOGIC) ...
+        // (Paste the rest of your existing loadDetail code here for Seasons/Cast)
+        const seasonCon = document.getElementById("seasonContainer");
+        const seasonList = document.getElementById("dtSeasons");
+        const epList = document.getElementById("dtEpisodes");
+        seasonList.innerHTML = ''; epList.innerHTML = '';
 
         if (type === 'tv' && m.seasons) {
-          seasonContainer.style.display = 'block';
-
+          seasonCon.style.display = 'block';
           m.seasons.forEach(s => {
-            // Filter out Season 0 (Specials) usually
             if (s.season_number > 0 && s.poster_path) {
-              const div = document.createElement('div');
-              div.className = 'season-card';
-              div.innerHTML = `
-                <img class="season-img" src="${POSTER_BASE}${s.poster_path}">
-                <div class="season-info">S${s.season_number} • ${s.episode_count} eps</div>
-              `;
-              seasonList.appendChild(div);
-
-              // Click Handler for Season
-              div.onclick = async () => {
-                // A. Visual Selection
-                document.querySelectorAll('.season-card').forEach(c => c.classList.remove('active'));
-                div.classList.add('active');
-
-                // B. Fetch Episodes
-                try {
-                  // Show Loading Text
-                  dtEpisodes.innerHTML = '<div style="color:#666; padding:10px;">Loading episodes...</div>';
-                  epHeader.style.display = 'block';
-
-                  const epData = await api.get(`/tv/${m.id}/season/${s.season_number}`);
-
-                  // C. Render Episodes
-                  await app.renderEpisodes({
-                    episodes: epData.episodes,
-                    seasonNumber: s.season_number,
-                    showName: m.name,
-                    showId: m.id
-                  });
-                } catch (err) {
-                  console.error(err);
-                  dtEpisodes.innerHTML = '<div style="color:red">Error loading episodes</div>';
-                }
+              const d = document.createElement("div");
+              d.className = "season-card";
+              d.innerHTML = `<img class="season-img" src="${POSTER_BASE}${s.poster_path}"><div class="season-info">Season ${s.season_number}</div>`;
+              d.onclick = async () => {
+                document.querySelectorAll(".season-card").forEach(c => c.classList.remove('active'));
+                d.classList.add('active');
+                const epData = await api.get(`/tv/${id}/season/${s.season_number}`);
+                app.renderEpisodes({ episodes: epData.episodes, seasonNumber: s.season_number, showName: m.name, showId: id });
               };
+              seasonList.appendChild(d);
             }
           });
-        } else {
-          seasonContainer.style.display = 'none';
-        }
+        } else seasonCon.style.display = 'none';
 
-        // 4. Cast & Recs
-        const castEl = document.getElementById('dtCast');
+        const castEl = document.getElementById("dtCast");
         castEl.innerHTML = '';
-        if (credits.cast) {
-          credits.cast.slice(0, 10).forEach(p => {
+
+        if (m.credits?.cast) {
+          m.credits.cast.slice(0, 10).forEach(p => {
             if (p.profile_path) {
-              castEl.innerHTML += `<div class="cast-item"><img class="cast-img" src="${POSTER_BASE}${p.profile_path}"><div>${p.name}</div></div>`;
+              const item = document.createElement('div');
+              item.className = 'cast-item';
+              // Use actorUI.openActorProfile on click
+              item.innerHTML = `
+         <img class="cast-img" src="${POSTER_BASE}${p.profile_path}" 
+              style="cursor:pointer" 
+              onclick="actorUI.openActorProfile(${p.id})">
+         <div>${p.name}</div>
+       `;
+              castEl.appendChild(item);
             }
           });
         }
 
-        const recEl = document.getElementById('recContainer');
+        const recEl = document.getElementById("recContainer");
         recEl.innerHTML = '';
-        ui.row('More Like This', recs.results, 'recContainer', type);
+        ui.row("More Like This", m.recommendations?.results, "recContainer", type);
+      },*/
+
+      loadDetail: async (params) => {
+        const { id, type } = params;
+
+        // 1. Fetch Data
+        const m = await api.get(`/${type}/${id}`, {
+          append_to_response: "external_ids,credits,recommendations,release_dates,content_ratings"
+        });
+        if (localStorage.getItem('aether_is_kids') === 'true') {
+          let isSafe = true;
+
+          // CHECK 1: Genres
+          const badGenres = ["Horror", "Crime", "Thriller", "War"];
+          if (m.genres.some(g => badGenres.includes(g.name))) isSafe = false;
+
+          // CHECK 2: Ratings (Certification)
+          let rating = '';
+          if (type === 'movie' && m.release_dates) {
+            const usRelease = m.release_dates.results.find(r => r.iso_3166_1 === 'US');
+            if (usRelease) {
+              // Get the first release certification
+              rating = usRelease.release_dates[0].certification;
+            }
+          } else if (type === 'tv' && m.content_ratings) {
+            const usRating = m.content_ratings.results.find(r => r.iso_3166_1 === 'US');
+            if (usRating) rating = usRating.rating;
+          }
+
+          const badRatings = ['R', 'NC-17', 'TV-MA', 'TV-14']; // TV-14 is borderline, decide if you want it
+          if (badRatings.includes(rating)) isSafe = false;
+
+          if (!isSafe) {
+            alert("This content is restricted in Kids Profile.");
+            app.go('home'); // EJECT TO HOME
+            return;
+          }
+        }
+        // ==========================================
+
+        app.state.currentMedia = m;
+
+        // 2. Populate Info
+        document.getElementById("dtBackdrop").src = IMG_BASE + m.backdrop_path;
+        document.getElementById("dtPoster").src = POSTER_BASE + m.poster_path;
+        document.getElementById("dtTitle").innerText = m.title || m.name;
+        document.getElementById("dtDesc").innerText = m.overview;
+        document.getElementById("dtYear").innerText = (m.release_date || m.first_air_date || '').split('-')[0];
+        document.getElementById("dtRuntime").innerText = type === 'movie' ? (m.runtime + 'm') : (m.number_of_seasons + ' Seasons');
+
+        // 3. User State Logic (Async)
+        const user = app.state.user;
+        let isFav = false;
+        let myRating = 0;
+
+        // Reset Stars UI
+        document.querySelectorAll('#dtUserRating .star-btn').forEach(s => s.classList.remove('filled'));
+
+        if (user) {
+          import("./js/firebase/db.js").then(async ({ getUserData, getUserRating }) => {
+            const userData = await getUserData(user);
+            isFav = (userData.favorites || []).some(f => f.id === m.id);
+
+            myRating = await getUserRating(user, m.id);
+            if (myRating > 0) {
+              document.querySelectorAll('#dtUserRating .star-btn').forEach((s, i) => {
+                if (i < myRating) s.classList.add('filled');
+              });
+            }
+
+            // Refresh button state after fetching data
+            updateButtonStates();
+          });
+        }
+
+        // --- 4. BUILD ACTION BAR (THE FIX) ---
+        // Find the container where buttons usually go (or create one if missing)
+        let actionContainer = document.querySelector('.detail-actions-bar');
+
+        // If we are replacing the old HTML structure, find the old container and replace it
+        if (!actionContainer) {
+          const oldContainer = document.querySelector('#view-detail .detail-info div[style*="display:flex"]');
+          if (oldContainer) {
+            // Create new container
+            actionContainer = document.createElement('div');
+            actionContainer.className = 'detail-actions-bar';
+            oldContainer.parentNode.insertBefore(actionContainer, oldContainer);
+            oldContainer.remove(); // Remove old messy container
+          }
+        }
+
+        // Clear container to rebuild
+        actionContainer.innerHTML = '';
+
+        // SECTION A: PRIMARY (Watch)
+        const primaryRow = document.createElement('div');
+        primaryRow.className = 'actions-primary';
+
+        const streamBtn = document.createElement('button');
+        streamBtn.className = 'btn btn-primary magnetic';
+        streamBtn.innerHTML = `<i class="fas fa-play"></i> Watch Now`;
+        streamBtn.onclick = () => player.open(m);
+
+        const partyBtn = document.createElement('button');
+        partyBtn.className = 'btn btn-blur magnetic';
+        partyBtn.innerHTML = `<i class="fas fa-users"></i> Watch Party`;
+        partyBtn.style.border = '1px solid var(--accent)';
+        partyBtn.style.color = 'var(--accent)';
+        partyBtn.onclick = async () => {
+          const data = { ...m, poster_path: POSTER_BASE + m.poster_path };
+          watchPartyUI.watchMovie(data);
+        };
+
+        primaryRow.appendChild(streamBtn);
+        primaryRow.appendChild(partyBtn);
+
+        // SECTION B: SECONDARY (Tools)
+        const secondaryRow = document.createElement('div');
+        secondaryRow.className = 'actions-secondary';
+
+        // 1. Trailer
+        const trailerBtn = document.createElement('button');
+        trailerBtn.className = 'btn-tool';
+        trailerBtn.innerHTML = `<i class="fas fa-film"></i> Trailer`;
+        trailerBtn.onclick = () => app.playVideo(m.id, type, m.title || m.name);
+
+        // 2. Watchlist
+        const listBtn = document.createElement('button');
+        listBtn.id = 'dtListBtn'; // ID for updates
+        listBtn.className = 'btn-tool';
+        listBtn.innerHTML = `<i class="fas fa-plus"></i> List`;
+        listBtn.onclick = () => app.toggleWatchlist(m);
+
+        // 3. Favorite (Icon)
+        const favBtn = document.createElement('button');
+        favBtn.id = 'dtFavBtn';
+        favBtn.className = 'btn-tool-icon';
+        favBtn.title = "Favorite";
+        favBtn.innerHTML = `<i class="fas fa-heart"></i>`;
+        favBtn.onclick = () => app.toggleFavorite(m, favBtn);
+
+        // 4. Aether Lens (Icon)
+        const lensBtn = document.createElement('button');
+        lensBtn.className = 'btn-tool-icon';
+        lensBtn.title = "AI Analysis";
+        lensBtn.innerHTML = `<i class="fas fa-eye"></i>`;
+        lensBtn.onclick = () => window.lensUI.toggle(m);
+
+        secondaryRow.appendChild(trailerBtn);
+        secondaryRow.appendChild(listBtn);
+        secondaryRow.appendChild(favBtn);
+        secondaryRow.appendChild(lensBtn);
+
+        // Append to Main Container
+        actionContainer.appendChild(primaryRow);
+        actionContainer.appendChild(secondaryRow);
+
+        // Helper to update button visuals after async data loads
+        const updateButtonStates = () => {
+          if (isFav) favBtn.classList.add('active');
+          app.updateListBtn(listBtn, m.id);
+        };
+
+        // Run initial update for List status (local storage check)
+        app.updateListBtn(listBtn, m.id);
+
+
+        // --- 5. REST OF PAGE (Seasons, Cast, Recs) ---
+        const seasonCon = document.getElementById("seasonContainer");
+        const seasonList = document.getElementById("dtSeasons");
+        seasonList.innerHTML = ''; document.getElementById('dtEpisodes').innerHTML = '';
+
+        if (type === 'tv' && m.seasons) {
+          seasonCon.style.display = 'block';
+          m.seasons.forEach(s => {
+            if (s.season_number > 0 && s.poster_path) {
+              const d = document.createElement("div");
+              d.className = "season-card";
+              d.innerHTML = `<img class="season-img" src="${POSTER_BASE}${s.poster_path}"><div class="season-info">Season ${s.season_number}</div>`;
+              d.onclick = async () => {
+                document.querySelectorAll(".season-card").forEach(c => c.classList.remove('active'));
+                d.classList.add('active');
+                const epData = await api.get(`/tv/${id}/season/${s.season_number}`);
+                app.renderEpisodes({ episodes: epData.episodes, seasonNumber: s.season_number, showName: m.name, showId: id });
+              };
+              seasonList.appendChild(d);
+            }
+          });
+        } else seasonCon.style.display = 'none';
+
+        // Cast
+        const castEl = document.getElementById("dtCast");
+        castEl.innerHTML = '';
+        if (m.credits?.cast) {
+          m.credits.cast.slice(0, 10).forEach(p => {
+            if (p.profile_path) {
+              const item = document.createElement('div');
+              item.className = 'cast-item';
+              item.innerHTML = `
+                    <img class="cast-img" src="${POSTER_BASE}${p.profile_path}" style="cursor:pointer" onclick="actorUI.openActorProfile(${p.id})">
+                    <div>${p.name}</div>
+                `;
+              castEl.appendChild(item);
+            }
+          });
+        }
+
+        // Recommendations
+        // Recommendations
+        const recEl = document.getElementById("recContainer");
+        recEl.innerHTML = '';
+
+        if (m.recommendations && m.recommendations.results) {
+
+          // 1. FILTER unsafe content
+          const safeRecs = app.filterSafeContent(m.recommendations.results);
+
+          // 2. DISPLAY safe list OR fallback
+          if (safeRecs.length > 0) {
+            ui.row("More Like This", safeRecs, "recContainer", type);
+          } else {
+            recEl.innerHTML = `
+              <div style="
+                color: gray; 
+                padding: 20px; 
+                font-size: 14px; 
+                text-align: center;
+               ">
+                 No safe recommendations available.
+              </div>`;
+          }
+
+        } else {
+          recEl.innerHTML = `
+            <div style="
+              color: gray; 
+              padding: 20px; 
+              font-size: 14px; 
+              text-align: center;
+            ">
+            No recommendations available.
+          </div>`;
+        }
+
+
+        // Setup Star Rating Clicks
+        const stars = document.querySelectorAll('#dtUserRating .star-btn');
+        stars.forEach(star => {
+          star.onclick = () => app.setUserRating(m, parseInt(star.getAttribute('data-val')));
+        });
+      },
+
+      updateSidebarGenres: () => {
+        const isKids = localStorage.getItem('aether_is_kids') === 'true';
+        const gList = document.getElementById("genreList");
+        gList.innerHTML = ''; // Clear existing
+
+        let validGenres = [];
+
+        if (isKids) {
+          // --- KIDS GENRES ---
+          validGenres = [
+            { id: 16, name: "Animation" },
+            { id: 10751, name: "Family" },
+            { id: 12, name: "Adventure" },
+            { id: 14, name: "Fantasy" },
+            { id: 35, name: "Comedy" },
+            { id: 10402, name: "Music" },
+            { id: 878, name: "Sci-Fi" } // Usually safe if paired with PG filter
+          ];
+        } else {
+          // --- ADULT GENRES ---
+          validGenres = [
+            { id: 28, name: 'Action' }, { id: 12, name: 'Adventure' }, { id: 35, name: 'Comedy' },
+            { id: 80, name: 'Crime' }, { id: 18, name: 'Drama' }, { id: 14, name: 'Fantasy' },
+            { id: 27, name: 'Horror' }, { id: 878, name: 'Sci-Fi' }, { id: 53, name: 'Thriller' },
+            { id: 10749, name: 'Romance' }, { id: 9648, name: 'Mystery' }, { id: 37, name: 'Western' }
+          ];
+        }
+
+        // Render Logic
+        validGenres.forEach(g => {
+          const el = document.createElement("div");
+          el.className = "genre-tag";
+          el.innerText = g.name;
+          el.onclick = () => {
+            app.toggleSidebar(false);
+
+            // NOTE: api.get() global filter handles the safety. 
+            // Even if they click "Sci-Fi", the API will receive "&certification_lte=PG"
+            app.go("network", { id: g.id, name: g.name, type: "genre" });
+          };
+          gList.appendChild(el);
+        });
+      },
+
+      /*
+        loadDetail: async (params) => {
+          const { id, type } = params;
+          console.log("Loading Detail for:", id, type);
+  
+          // 1. Fetch Data
+          const m = await api.get(`/${type}/${id}`, { append_to_response: "external_ids,credits,recommendations" });
+          app.state.currentMedia = m;
+  
+          // 2. Populate Info
+          document.getElementById("dtBackdrop").src = IMG_BASE + m.backdrop_path;
+          document.getElementById("dtPoster").src = POSTER_BASE + m.poster_path;
+          document.getElementById("dtTitle").innerText = m.title || m.name;
+          document.getElementById("dtDesc").innerText = m.overview;
+          document.getElementById("dtYear").innerText = (m.release_date || m.first_air_date || '').split('-')[0];
+          document.getElementById("dtRuntime").innerText = type === 'movie' ? (m.runtime + 'm') : (m.number_of_seasons + ' Seasons');
+  
+          // 3. User State (Favorites/Rating)
+          const user = app.state.user;
+          const favBtn = document.getElementById("dtFavBtn");
+          const stars = document.querySelectorAll('#dtUserRating .star-btn');
+  
+          favBtn.classList.remove('active');
+          stars.forEach(s => s.classList.remove('filled'));
+  
+          if (user) {
+            import("./js/firebase/db.js").then(async ({ getUserData, getUserRating }) => {
+              const userData = await getUserData(user);
+              const isFav = (userData.favorites || []).some(f => f.id === m.id);
+              if (isFav) favBtn.classList.add('active');
+  
+              const myRating = await getUserRating(user, m.id);
+              if (myRating > 0) stars.forEach((s, i) => i < myRating && s.classList.add('filled'));
+            });
+          }
+  
+          // 4. Bind Standard Buttons
+          favBtn.onclick = () => app.toggleFavorite(m, favBtn);
+          stars.forEach(star => {
+            star.onclick = () => app.setUserRating(m, parseInt(star.getAttribute('data-val')));
+          });
+          document.getElementById("dtPlayBtn").onclick = () => app.playVideo(m.id, type, m.title || m.name);
+          const listBtn = document.getElementById("dtListBtn");
+          listBtn.onclick = () => app.toggleWatchlist(m);
+          app.updateListBtn(listBtn, m.id);
+  
+  
+          // --- 5. DYNAMIC BUTTONS (Stream & Party) ---
+  
+          // FIX: Safer way to find the button container
+          const container = listBtn.parentNode;
+  
+          // A. Remove old buttons to prevent duplicates
+          const oldStream = document.getElementById("dtStreamBtn");
+          const oldParty = document.getElementById("dtPartyBtn");
+          if (oldStream) oldStream.remove();
+          if (oldParty) oldParty.remove();
+  
+          // B. Create Watch Party Button
+          const partyBtn = document.createElement("button");
+          partyBtn.id = "dtPartyBtn";
+          partyBtn.className = "btn btn-blur magnetic";
+          partyBtn.innerHTML = `<i class="fas fa-users"></i> Watch Party`;
+          partyBtn.style.cssText = "border: 1px solid var(--accent); color: var(--accent); margin-right: 10px;";
+  
+          partyBtn.onclick = async () => {
+            console.log("Watch Party Button Clicked"); // DEBUG LOG
+  
+            if (window.watchPartyUI) {
+              const movieForSession = {
+                ...m,
+                poster_path: POSTER_BASE + m.poster_path
+              };
+              await window.watchPartyUI.watchMovie(movieForSession);
+            } else {
+              alert("Party system is not loaded yet.");
+            }
+          };
+  
+          // Create LENS Button
+          const lensBtn = document.createElement("button");
+          lensBtn.className = "btn-icon magnetic";
+          lensBtn.innerHTML = `<i class="fas fa-eye"></i>`;
+          lensBtn.title = "Activate Aether Lens";
+          lensBtn.style.marginLeft = "10px";
+          lensBtn.style.border = "1px solid var(--text-muted)";
+  
+          lensBtn.onclick = () => {
+            window.lensUI.toggle(m); // Pass the current movie object
+          };
+  
+          // Add to the container (at the end)
+          // container is the div holding Play/Stream/Party buttons
+          container.appendChild(lensBtn);
+  
+          // C. Create Stream Button
+          const streamBtn = document.createElement("button");
+          streamBtn.id = "dtStreamBtn";
+          streamBtn.className = "btn btn-primary magnetic";
+          streamBtn.innerHTML = `<i class="fas fa-play"></i> Start Stream`;
+          streamBtn.style.cssText = "background: var(--accent); border: none; color: #fff; margin-right: 10px;";
+  
+          streamBtn.onclick = () => {
+            if (window.player) window.player.open(m);
+          };
+  
+          // D. Insert Buttons (Order: Play Trailer -> Stream -> Party -> List -> Fav)
+          container.insertBefore(partyBtn, listBtn);
+          container.insertBefore(streamBtn, partyBtn);
+  
+  
+          // --- 6. Seasons & Cast ---
+          const seasonCon = document.getElementById("seasonContainer");
+          const seasonList = document.getElementById("dtSeasons");
+          const epList = document.getElementById("dtEpisodes");
+          seasonList.innerHTML = ''; epList.innerHTML = '';
+  
+          if (type === 'tv' && m.seasons) {
+            seasonCon.style.display = 'block';
+            m.seasons.forEach(s => {
+              if (s.season_number > 0 && s.poster_path) {
+                const d = document.createElement("div");
+                d.className = "season-card";
+                d.innerHTML = `<img class="season-img" src="${POSTER_BASE}${s.poster_path}"><div class="season-info">Season ${s.season_number}</div>`;
+                d.onclick = async () => {
+                  document.querySelectorAll(".season-card").forEach(c => c.classList.remove('active'));
+                  d.classList.add('active');
+                  const epData = await api.get(`/tv/${id}/season/${s.season_number}`);
+                  app.renderEpisodes({ episodes: epData.episodes, seasonNumber: s.season_number, showName: m.name, showId: id });
+                };
+                seasonList.appendChild(d);
+              }
+            });
+          } else seasonCon.style.display = 'none';
+  
+          const castEl = document.getElementById("dtCast");
+          castEl.innerHTML = '';
+          if (m.credits?.cast) {
+            m.credits.cast.slice(0, 10).forEach(p => {
+              if (p.profile_path) {
+                const item = document.createElement('div');
+                item.className = 'cast-item';
+                item.innerHTML = `<img class="cast-img" src="${POSTER_BASE}${p.profile_path}" style="cursor:pointer" onclick="actorUI.openActorProfile(${p.id})"><div>${p.name}</div>`;
+                castEl.appendChild(item);
+              }
+            });
+          }
+  
+          const recEl = document.getElementById("recContainer");
+          recEl.innerHTML = '';
+          ui.row("More Like This", m.recommendations?.results, "recContainer", type);
+        },
+  
+  */
+      // --- FAVORITES LOGIC ---
+      toggleFavorite: async (m, btn) => {
+        const user = app.state.user;
+        if (!user) return alert("Please login to save favorites.");
+
+        // Check local state (we need to store favorites locally or check class)
+        const isActive = btn.classList.contains('active');
+
+        if (isActive) {
+          btn.classList.remove('active');
+          await removeFavorite(user, m);
+        } else {
+          btn.classList.add('active');
+          // Animation
+          gsap.fromTo(btn, { scale: 1.5 }, { scale: 1, duration: 0.4, ease: "elastic.out(1, 0.3)" });
+          await addFavorite(user, m);
+        }
+      },
+
+      // --- RATING LOGIC ---
+      setUserRating: async (m, rating) => {
+        const user = app.state.user;
+        if (!user) return alert("Please login to rate.");
+
+        // Visual Update
+        const stars = document.querySelectorAll('#dtUserRating .star-btn');
+        stars.forEach((s, idx) => {
+          if (idx < rating) s.classList.add('filled');
+          else s.classList.remove('filled');
+        });
+
+        // DB Update
+        await rateMediaUser(user, m, rating);
       },
 
       // --- ORIGINALS (Global Ranking) ---
-      /* INSIDE app object */
+
 
       loadOriginals: async () => {
         const grid = document.getElementById('originalsGrid');
@@ -1742,11 +4338,32 @@
             const type = item.media_type || 'movie';
 
             // 1. Hydrate if missing BACKDROP (Horizontal Image)
-            if (!item.backdrop_path) {
+            /*if (!item.backdrop_path) {
               try {
                 const res = await api.get(`/${type}/${item.id}`);
                 if (res) item = { ...item, ...res };
               } catch (e) {
+                continue;
+              }
+            }*/
+
+            if (!item.backdrop_path) {
+              try {
+                // Try fetching as the saved type
+                let res = await api.get(`/${type}/${item.id}`);
+                
+                // If failed (res is null/undefined) and type was movie, TRY TV
+                if ((!res || !res.poster_path) && type === 'movie') {
+                     const tvRes = await api.get(`/tv/${item.id}`);
+                     if (tvRes && tvRes.id) {
+                         res = tvRes;
+                         type = 'tv'; // Correct the type for the click handler
+                     }
+                }
+
+                if (res) item = { ...item, ...res };
+              } catch (e) {
+                console.log("Hydration failed for", item.title);
                 continue;
               }
             }
@@ -1763,19 +4380,19 @@
               : 'https://via.placeholder.com/500x280?text=No+Image';
 
             wrapper.innerHTML = `
-        <div class="rank-badge">${i + 1}</div>
-        <div class="ranked-card">
-          <img src="${imgUrl}" loading="lazy" alt="${item.title}">
+              <div class="rank-badge">${i + 1}</div>
+              <div class="ranked-card">
+                <img src="${imgUrl}" loading="lazy" alt="${item.title}">
           
-          <!-- Metadata Overlay -->
-          <div class="ranked-meta">
-            <div class="ranked-title">${item.title || item.name}</div>
-            <div class="view-counter">
-              <i class="fas fa-eye"></i> ${item.view_count || 1}
-            </div>
-          </div>
-        </div>
-      `;
+                <!-- Metadata Overlay -->
+                <div class="ranked-meta">
+                  <div class="ranked-title">${item.title || item.name}</div>
+                  <div class="view-counter">
+                    <i class="fas fa-eye"></i> ${item.view_count || 1}
+                  </div>
+                </div>
+              </div>
+            `;
 
             wrapper.querySelector('.ranked-card').onclick = () => {
               app.go('detail', { id: item.id, type: type });
@@ -1826,135 +4443,146 @@
       loadProfile: async () => {
         const user = app.state.user;
 
-        // 1. Security Check: Redirect if not logged in
-        if (!user) return app.go('home');
-
-        // 2. Populate Basic User Info
-        document.getElementById('userPageName').innerText = user.displayName || 'Traveler';
-        // Use high-res avatar if available, otherwise default
-        document.getElementById('userPageAvatar').src = user.photoURL || "https://mir-s3-cdn-cf.behance.net/project_modules/disp/84c20033850498.56ba69ac290ea.png";
-
-        // 3. Fetch User Data (Watchlist & History) from Firestore
-        // getUserData returns { watchlist: [], history: [], settings: {} }
-        const userData = await getUserData(user);
-        const list = userData.watchlist || [];
-        const history = userData.history || [];
-
-        // 4. Calculate Analytics (Stats)
-        const movieCount = list.filter(i => i.media_type === 'movie').length;
-        const showCount = list.filter(i => i.media_type === 'tv').length;
-
-        // Update Stats UI
-        document.getElementById('statMovies').innerText = movieCount;
-        document.getElementById('statShows').innerText = showCount;
-        document.getElementById('statTotalItems').innerText = list.length;
-
-        // Determine User "Badge" based on viewing habits
-        const badge = document.getElementById('favGenreBadge');
-        if (list.length === 0) badge.innerText = "Newcomer";
-        else if (movieCount > showCount) badge.innerText = "Film Buff";
-        else badge.innerText = "Series Binger";
-
-        // 5. Dynamic Cover Art Logic
-        // Use the last watched item (History) or last saved item (Watchlist) as banner
-        const lastItem = history[history.length - 1] || list[list.length - 1];
-        const coverDiv = document.getElementById('profileCoverImg');
-
-        if (lastItem && lastItem.backdrop_path) {
-          // IMG_BASE is defined globally (https://image.tmdb.org/t/p/original)
-          coverDiv.style.backgroundImage = `url(${IMG_BASE + lastItem.backdrop_path})`;
-        } else {
-          // Default fallback image (Dune 2 backdrop)
-          coverDiv.style.backgroundImage = `url(https://image.tmdb.org/t/p/original/rULWuutDCN5PvwmUdbryohj9lBb.jpg)`;
+        // 1. Safety Redirect
+        if (!user) {
+          console.warn("No user logged in, redirecting...");
+          return app.go('home');
         }
 
-        // 6. Universal List Renderer
-        // Handles both Watchlist (Go to Detail) and History (Resume Play)
-        const renderList = (data, containerId, isHistory = false) => {
-          const grid = document.getElementById(containerId);
-          grid.innerHTML = ''; // Clear previous content
+        console.log("Loading Profile for:", user.email);
 
-          if (!data || !data.length) {
-            grid.innerHTML = '<div style="color:var(--text-muted); padding:20px;">Your collection is empty.</div>';
+        // 2. Render Basic Info IMMEDIATELY (Prevents black screen)
+        const nameEl = document.getElementById('userPageName');
+        const avatarEl = document.getElementById('userPageAvatar');
+        const coverEl = document.getElementById('profileCoverImg');
+
+        if (nameEl) nameEl.innerText = user.displayName || 'Traveler';
+        if (avatarEl) avatarEl.src = user.photoURL || "https://mir-s3-cdn-cf.behance.net/project_modules/disp/84c20033850498.56ba69ac290ea.png";
+
+        // Set a default background immediately so it's not black
+        if (coverEl) coverEl.style.backgroundImage = `url('https://image.tmdb.org/t/p/original/rULWuutDCN5PvwmUdbryohj9lBb.jpg')`;
+
+        // 3. Fetch Data
+        let list = [];
+        let history = [];
+
+        try {
+          const userData = await getUserData(user);
+          if (userData) {
+            list = userData.watchlist || [];
+            history = userData.history || [];
+          }
+        } catch (e) { console.error("DB Error:", e); }
+
+        // 4. Hydration (Safe Mode)
+        const hydrate = async (items) => {
+          if (!items || !items.length) return [];
+          const results = await Promise.allSettled(items.map(async (item) => {
+            // Use existing image if we have it
+            if (item.poster_path || item.backdrop_path) return item;
+            try {
+              // If ID is missing, skip
+              if (!item.id) return null;
+              const type = item.media_type || 'movie';
+              const fresh = await api.get(`/${type}/${item.id}`);
+              return fresh ? { ...item, ...fresh, media_type: type } : item;
+            } catch (e) { return item; }
+          }));
+          return results.map(r => r.status === 'fulfilled' ? r.value : null).filter(i => i);
+        };
+
+        // Show visual loading state
+        const uGrid = document.getElementById('userPageGrid');
+        const hGrid = document.getElementById('userHistoryGrid');
+        if (uGrid) uGrid.innerHTML = '<div style="color:gray; padding:20px;">Syncing...</div>';
+        if (hGrid) hGrid.innerHTML = '<div style="color:gray; padding:20px;">Syncing...</div>';
+
+        // Hydrate Data
+        list = await hydrate(list);
+        history = await hydrate(history);
+
+        // 5. Update Stats (Safe check for elements)
+        const updateText = (id, txt) => { const el = document.getElementById(id); if (el) el.innerText = txt; };
+
+        const mCount = list.filter(i => i.media_type === 'movie').length;
+        const tCount = list.filter(i => i.media_type === 'tv').length;
+
+        updateText('statMovies', mCount);
+        updateText('statShows', tCount);
+        updateText('statTotalItems', list.length);
+
+        // 6. Update Dynamic Cover Art (if valid)
+        const lastItem = history[history.length - 1] || list[list.length - 1];
+        if (lastItem && lastItem.backdrop_path && coverEl) {
+          coverEl.style.backgroundImage = `url(${IMG_BASE + lastItem.backdrop_path})`;
+        }
+
+        // 7. Render Grids
+        const renderGrid = (data, containerEl, isHistory) => {
+          if (!containerEl) return;
+          containerEl.innerHTML = '';
+
+          if (!data.length) {
+            containerEl.innerHTML = '<div style="color:#666; padding:20px;">Nothing here yet.</div>';
             return;
           }
 
-          // Reverse array to show newest items first
           [...data].reverse().forEach(m => {
-            // Create the standard card using UI helper
-            // Ensure media_type is set for the card logic
-            const type = m.media_type || (m.title ? 'movie' : 'tv');
+            if (!m || !m.id) return; // Skip invalid items
+
+            const type = m.media_type || 'movie';
             const c = ui.card(m, type);
 
             if (c) {
-              // --- HISTORY SPECIFIC LOGIC ---
               if (isHistory) {
-                // Override the default onclick.
-                // Instead of going to Detail View, we open the Player.
-
-                // 1. Add Visual Play Overlay
-                const playOverlay = document.createElement('div');
-                playOverlay.style.cssText = `
-                        position:absolute; inset:0; background:rgba(0,0,0,0.6);
-                        display:flex; align-items:center; justify-content:center;
-                        opacity:0; transition:0.3s; pointer-events:none;
-                        backdrop-filter:blur(2px);
-                    `;
-                playOverlay.innerHTML = `<i class="fas fa-play" style="font-size:32px; color:#fff; filter:drop-shadow(0 0 10px rgba(229,9,20,0.8));"></i>`;
-                c.appendChild(playOverlay);
-
-                // 2. Hover Effects
-                c.onmouseenter = () => playOverlay.style.opacity = 1;
-                c.onmouseleave = () => playOverlay.style.opacity = 0;
-
-                // 3. Add Season/Episode Badge if applicable
-                if (type === 'tv' && m.season && m.episode) {
-                  const epLabel = document.createElement('div');
-                  epLabel.innerHTML = `S${m.season} E${m.episode}`;
-                  epLabel.style.cssText = `
-                            position:absolute; top:8px; right:8px; 
-                            background:var(--accent); color:#fff; 
-                            font-size:10px; font-weight:800; padding:4px 8px; 
-                            border-radius:4px; z-index:2; box-shadow:0 2px 5px rgba(0,0,0,0.5);
-                        `;
-                  c.appendChild(epLabel);
-                }
-
-                // 4. Click to Resume
-                c.onclick = () => {
-                  // Close profile view logic is handled by player.open internally (via sync or UI)
-                  // Pass stored season/episode to resume specific point
-                  player.open(m, m.season || null, m.episode || null);
-                };
+                c.onclick = () => player.open(m, m.season, m.episode);
+                // Add play icon overlay
+                c.innerHTML += `<div style="position:absolute;inset:0;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;pointer-events:none;"><i class="fas fa-play" style="font-size:24px;color:#fff;"></i></div>`;
               }
-
-              grid.appendChild(c);
+              containerEl.appendChild(c);
             }
           });
         };
 
-        // Render Watchlist (Standard behavior)
-        renderList(list, 'userPageGrid', false);
-
-        // Render History (Resume behavior)
-        renderList(history, 'userHistoryGrid', true);
+        renderGrid(list, uGrid, false);
+        renderGrid(history, hGrid, true);
       },
       // --- TAB SWITCHER HELPER ---
       switchProfileTab: (tabName) => {
-        // Reset buttons
+        // 1. Handle UI Toggling (Classes & Display)
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        // Hide content
+        // Use event.currentTarget to safely get the button even if clicking text inside it
+        if (event && event.currentTarget) event.currentTarget.classList.add('active');
+
         document.querySelectorAll('.profile-tab-content').forEach(c => c.style.display = 'none');
 
-        // Activate selected
-        const clickedBtn = event.target;
-        clickedBtn.classList.add('active');
-
         const targetContent = document.getElementById(`tab-${tabName}`);
-        targetContent.style.display = 'block';
+        if (targetContent) {
+          targetContent.style.display = 'block';
+          // Animation
+          gsap.fromTo(targetContent, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3 });
+        }
 
-        // Animation
-        gsap.fromTo(targetContent, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3 });
+        // 2. TRIGGER DATA LOADING (The Missing Link)
+        if (tabName === 'social') {
+          // Load Friends/Requests when tab is clicked
+          if (window.socialUI) window.socialUI.loadSocialData();
+        }
+        else if (tabName === 'analytics') {
+          // Load Stats/Trending when tab is clicked
+          if (window.analyticsUI) {
+            window.analyticsUI.loadUserStats();
+            window.analyticsUI.switchTab('feed'); // Default to feed
+          }
+        }
+      },
+
+      toggleAdultSafety: () => {
+        const isChecked = document.getElementById('settingSafetyFilter').checked;
+        localStorage.setItem('aether_adult_safety', isChecked);
+
+        // Visual Feedback
+        if (isChecked) alert("Safety Filter Active. Sensitive searches will now trigger a security warning.");
       },
       renderEpisodes: async (params) => {
         const { episodes, seasonNumber, showName, showId } = params;
@@ -2093,10 +4721,15 @@
           btn.style.display = 'none';
           return;
         }
+        const safeResults = app.filterSafeContent(res.results);
         document.getElementById(type === 'movie' ? 'netMovieSection' : 'netTvSection').style.display = 'block';
         const frag = document.createDocumentFragment();
         const newCards = [];
         res.results.forEach(m => {
+          const c = ui.card(m, type);
+          if (c) { frag.appendChild(c); newCards.push(c); }
+        });
+        safeResults.forEach(m => {
           const c = ui.card(m, type);
           if (c) { frag.appendChild(c); newCards.push(c); }
         });
@@ -2173,11 +4806,46 @@
         btn.style.color = inList ? 'var(--accent)' : '#fff';
         btn.style.borderColor = inList ? 'var(--accent)' : 'rgba(255,255,255,0.1)';
       },
-      renderWatchlist: () => {
+      /*renderWatchlist: () => {
         const grid = document.getElementById('watchlistGrid');
         grid.innerHTML = '';
         if (!app.state.watchlist.length) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#666">Your list is empty</div>';
         app.state.watchlist.forEach(m => { const c = ui.card(m, m.media_type); if (c) grid.appendChild(c); });
+        gsap.from(grid.children, { scale: 0.9, opacity: 0, stagger: 0.05 });
+      },*/
+
+      renderWatchlist: async () => {
+        const grid = document.getElementById('watchlistGrid');
+        grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:gray;">Syncing library...</div>';
+
+        let list = app.state.watchlist || [];
+
+        if (!list.length) {
+          grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:#666">Your list is empty</div>';
+          return;
+        }
+
+        // HYDRATE LOOP
+        const hydratedList = await Promise.all(list.map(async (item) => {
+          if (item.poster_path) return item; // Have image, skip fetch
+          try {
+            const type = item.media_type || 'movie';
+            const res = await api.get(`/${type}/${item.id}`);
+            // Return merged data
+            return res.poster_path ? { ...item, ...res, media_type: type } : item;
+          } catch (e) { return item; }
+        }));
+
+        // Update App State so we don't fetch again this session
+        app.state.watchlist = hydratedList;
+
+        grid.innerHTML = '';
+        hydratedList.forEach(m => {
+          // Allow card to render even if image is still missing (via placeholder)
+          const c = ui.card(m, m.media_type);
+          if (c) grid.appendChild(c);
+        });
+
         gsap.from(grid.children, { scale: 0.9, opacity: 0, stagger: 0.05 });
       },
 
@@ -2241,14 +4909,178 @@
         if (app.state.searchOpen) { overlay.classList.add('open'); setTimeout(() => input.focus(), 500); }
         else { overlay.classList.remove('open'); input.blur(); }
       },
-      handleSearch: async (e) => {
+      searchTimeout: null, // Add this state variable
+
+      /*handleSearch: (e) => {
         const query = e.target.value;
         const container = document.getElementById('searchResults');
-        if (query.length < 2) { container.innerHTML = ''; return; }
-        const res = await api.get('/search/multi', { query });
+
+        // 1. IMMEDIATE SAFETY CHECK (Runs on every keystroke)
+        if (!app.checkSafety(query)) {
+          container.innerHTML = '';
+          return; // Stop immediately
+        }
+
+        if (query.length < 2) {
+          container.innerHTML = '';
+          return;
+        }
+
+        // 2. DEBOUNCE API CALL
+        // Clear previous timer
+        if (app.searchTimeout) clearTimeout(app.searchTimeout);
+
+        // Wait 300ms after user stops typing to actually call API
+        app.searchTimeout = setTimeout(async () => {
+          const res = await api.get('/search/multi', { query });
+
+          // Render results...
+          container.innerHTML = '';
+          if (res && res.results) {
+            const valid = res.results.filter(i => i.media_type === 'movie' || i.media_type === 'tv');
+            valid.forEach(m => { const c = ui.card(m); if (c) container.appendChild(c); });
+          }
+        }, 300); // 300ms delay
+      },*/
+
+      // Inside the app object...
+
+      handleSearch: (e) => {
+        const query = e.target.value;
+        const container = document.getElementById('searchResults');
+
+        if (query.length < 2) {
+          container.innerHTML = '';
+          return;
+        }
+
+        // Clear previous debounce
+        if (app.searchTimeout) clearTimeout(app.searchTimeout);
+
+        app.searchTimeout = setTimeout(async () => {
+
+          // 1. CHECK FOR DANGER
+          // We use the strict regex list you defined earlier
+          const isRisky = app.checkSafetySimple(query);
+
+          if (isRisky) {
+            // 🛑 HIT DETECTED!
+            // Do not block yet. Try to find SAFE alternatives first.
+            console.log("Risky term detected. Attempting Safe Fallback...");
+            await app.runSafeSearch(query);
+          } else {
+            // ✅ CLEAN SEARCH
+            const res = await api.get('/search/multi', { query });
+            app.renderSearchResults(res, query, false); // false = normal mode
+          }
+
+        }, 300); // 300ms delay
+      },
+
+      // HELPER: Sanitize a list of movies for Kids
+      filterSafeContent: (items) => {
+        const isKids = localStorage.getItem('aether_is_kids') === 'true';
+        if (!isKids) return items; // Adults see everything
+
+        // Blacklist Config
+        const badGenres = [27, 80, 53, 10752, 18]; // Horror, Crime, Thriller, War, Drama
+
+        // Use the strict regex list we created earlier
+        const hasBadWord = (text) => RESTRICTED_TERMS.some(pattern => pattern.test(text));
+
+        return items.filter(m => {
+          // 1. Drop if no image (Low quality junk)
+          if (!m.poster_path && !m.backdrop_path) return false;
+
+          // 2. Drop by Genre
+          if (m.genre_ids && m.genre_ids.some(g => badGenres.includes(g))) return false;
+
+          // 3. Drop by Adult Flag
+          if (m.adult) return false;
+
+          // 4. Drop by Title/Desc Analysis (The "Hentai" filter)
+          const text = (m.title || m.name || "") + " " + (m.overview || "");
+          if (hasBadWord(text)) return false;
+
+          return true;
+        });
+      },
+
+      // Helper to just check regex (returns boolean, doesn't trigger modal)
+      checkSafetySimple: (query) => {
+        const isKids = localStorage.getItem('aether_is_kids') === 'true';
+        const isAdultSafety = localStorage.getItem('aether_adult_safety') === 'true';
+        if (!isKids && !isAdultSafety) return false;
+        return RESTRICTED_TERMS.some(pattern => pattern.test(query));
+      },
+
+
+      runSafeSearch: async (query) => {
+        const container = document.getElementById('searchResults');
+
+        // 1. Force strict parameters regardless of settings
+        // We search for movies/tv that contain the letters but are rated G/PG
+        const safeRes = await api.get('/search/multi', {
+          query: query,
+          certification_country: "US",
+          certification_lte: "PG", // STRICTLY PG or lower
+          without_genres: "27,80,53,10752,18" // No Horror, Crime, War, Drama
+        });
+
+        // 2. Double Check Results (Title Scanning)
+        // Even if TMDB says it's PG, if the title contains the bad word EXACTLY, remove it.
+        let safeItems = [];
+        if (safeRes && safeRes.results) {
+          safeItems = safeRes.results.filter(m => {
+            const title = (m.title || m.name || "").toLowerCase();
+            // Exclude if it is clearly adult (extra safety)
+            if (m.adult) return false;
+            // Keep content only if it has an image (usually higher quality/safe)
+            if (!m.poster_path) return false;
+            return true;
+          });
+        }
+
+        // 3. DECISION MOMENT
+        if (safeItems.length > 0) {
+          // 🎉 SUCCESS: We found safe things (e.g., input "Hell" -> found "Hello Kitty")
+          app.renderSearchResults({ results: safeItems }, query, true); // true = Safe Mode
+        } else {
+          // 💀 FAIL: We found nothing safe. This is likely a purely dirty search.
+          // NOW we trigger the scare.
+          app.triggerSecurityProtocol();
+        }
+      },
+
+      // Helper to Render (to avoid code duplication)
+      renderSearchResults: (res, query, isSafeMode) => {
+        const container = document.getElementById('searchResults');
         container.innerHTML = '';
+
+        if (isSafeMode) {
+          // Inject the "Safe Suggestions" Panel
+          const panel = document.createElement('div');
+          panel.className = 'safe-suggestion-panel';
+          panel.innerHTML = `
+            <div class="safe-suggestion-icon"><i class="fas fa-shield-alt"></i></div>
+            <div class="safe-suggestion-text">
+                <h3>Safe Search Suggestions</h3>
+                <p>We filtered results for "<strong>${query}</strong>" to show only family-friendly content.</p>
+            </div>
+          `;
+          container.appendChild(panel);
+        }
+
         const valid = res.results.filter(i => i.media_type === 'movie' || i.media_type === 'tv');
-        valid.forEach(m => { const c = ui.card(m); if (c) container.appendChild(c); });
+        if (valid.length === 0 && !isSafeMode) {
+          container.innerHTML = '<div style="color:#666; padding:20px;">No results found.</div>';
+          return;
+        }
+
+        valid.forEach(m => {
+          const c = ui.card(m);
+          if (c) container.appendChild(c);
+        });
       },
       toggleMenu: () => {
         app.state.menuOpen = !app.state.menuOpen;
@@ -2271,16 +5103,166 @@
         }
       },
       toggleSidebar: (force) => {
-        const sb = document.getElementById('genreSidebar');
+        const sb = document.getElementById("genreSidebar");
+        // Toggle State
         app.state.sidebarOpen = force !== undefined ? force : !app.state.sidebarOpen;
+
         if (app.state.sidebarOpen) {
-          gsap.to(sb, { x: 0, duration: 0.5, ease: 'power3.out' });
-          gsap.to('main', { filter: 'blur(5px) brightness(0.4)', duration: 0.5 });
+          gsap.to(sb, { x: 0, duration: 0.5, ease: "power4.out" });
+          gsap.to("main", { filter: "blur(5px) brightness(0.4)", duration: 0.5 });
+
+          // Stagger the list items in
+          gsap.fromTo('.genre-item',
+            { x: -20, opacity: 0 },
+            { x: 0, opacity: 1, duration: 0.4, stagger: 0.03, delay: 0.1 }
+          );
+
+          // Focus search
+          setTimeout(() => document.getElementById('genreFilterInput').focus(), 400);
         } else {
-          gsap.to(sb, { x: '-102%', duration: 0.5, ease: 'power3.in' });
-          gsap.to('main', { filter: 'blur(0px) brightness(1)', duration: 0.5 });
+          gsap.to(sb, { x: "-105%", duration: 0.5, ease: "power4.in" });
+          gsap.to("main", { filter: "blur(0px) brightness(1)", duration: 0.5 });
         }
       },
+
+      initSidebarFeatures: async () => {
+        // 1. POPULATE STATIC NAV
+        const dList = document.getElementById("discoverList");
+        const discoverItems = [
+          { name: "Home", icon: "fa-home", action: () => app.go('home') },
+          { name: "Originals", icon: "fa-crown", action: () => app.go('originals') },
+          { name: "Trending", icon: "fa-fire", action: () => app.go('network', { id: 'trending', name: 'Trending', type: 'special' }) },
+          { name: "Top Rated", icon: "fa-star", action: () => app.go('network', { id: 'top_rated', name: 'Top Rated', type: 'special' }) },
+          { name: "Watchlist", icon: "fa-bookmark", action: () => app.go('watchlist') },
+          { name: "Constellation", icon: "fa-atom", action: () => app.openConstellation() },
+        ];
+
+        dList.innerHTML = '';
+        discoverItems.forEach(item => {
+          const el = document.createElement("div");
+          el.className = "nav-item";
+          el.innerHTML = `<i class="fas ${item.icon}"></i> ${item.name}`;
+          el.onclick = () => { app.toggleSidebar(false); item.action(); };
+          dList.appendChild(el);
+        });
+
+        // 2. POPULATE GENRES (TAGS)
+        const genres = [
+          { id: 28, name: "Action" }, { id: 12, name: "Adventure" }, { id: 35, name: "Comedy" },
+          { id: 80, name: "Crime" }, { id: 99, name: "Documentary" }, { id: 18, name: "Drama" },
+          { id: 10751, name: "Family" }, { id: 14, name: "Fantasy" }, { id: 36, name: "History" },
+          { id: 27, name: "Horror" }, { id: 10402, name: "Music" }, { id: 9648, name: "Mystery" },
+          { id: 10749, name: "Romance" }, { id: 878, name: "Sci-Fi" }, { id: 53, name: "Thriller" },
+          { id: 10752, name: "War" }, { id: 37, name: "Western" }
+        ];
+
+        const gList = document.getElementById("genreList");
+        gList.innerHTML = '';
+        genres.forEach(g => {
+          const el = document.createElement("div");
+          el.className = "genre-tag"; // New class
+          el.innerText = g.name;
+          el.setAttribute('data-name', g.name.toLowerCase());
+          el.onclick = () => {
+            app.toggleSidebar(false);
+            app.go("network", { id: g.id, name: g.name, type: "genre" });
+          };
+          gList.appendChild(el);
+        });
+
+        // 3. SEARCH FILTER LOGIC
+        document.getElementById('genreFilterInput').addEventListener('input', (e) => {
+          const term = e.target.value.toLowerCase();
+
+          // Filter Nav Items
+          const navs = dList.querySelectorAll('.nav-item');
+          navs.forEach(n => {
+            if (n.innerText.toLowerCase().includes(term)) n.style.display = 'flex';
+            else n.style.display = 'none';
+          });
+
+          // Filter Genres
+          const tags = gList.querySelectorAll('.genre-tag');
+          tags.forEach(t => {
+            if (t.innerText.toLowerCase().includes(term)) t.style.display = 'block';
+            else t.style.display = 'none';
+          });
+        });
+
+        // 4. LOAD USER DATA & HISTORY (New!)
+        const user = app.state.user;
+        if (user) {
+          // Footer Info
+          document.getElementById('sidebarName').innerText = user.displayName || 'Traveler';
+          document.getElementById('sidebarAvatar').src = user.photoURL || "https://mir-s3-cdn-cf.behance.net/project_modules/disp/84c20033850498.56ba69ac290ea.png";
+
+          // Load Quick History
+          // We use the existing getUserData helper
+          import("./js/firebase/db.js").then(async ({ getUserData }) => {
+            const data = await getUserData(user);
+            const history = data.history || [];
+
+            const histContainer = document.getElementById('sidebarHistoryList');
+            const histSection = document.getElementById('sidebarHistorySection');
+
+            if (history.length > 0) {
+              histSection.style.display = 'block';
+              histContainer.innerHTML = '';
+
+              // Show last 3 items
+              const recent = history.slice(-3).reverse();
+
+              recent.forEach(m => {
+                if (!m.poster_path) return;
+                const div = document.createElement('div');
+                div.className = 'mini-history-card';
+                div.innerHTML = `
+                      <img src="https://image.tmdb.org/t/p/w200${m.poster_path}" class="mini-history-img">
+                      <div class="mini-history-info">
+                          <h4>${m.title || m.name}</h4>
+                          <span>${m.media_type === 'tv' && m.season ? `S${m.season} E${m.episode}` : 'Resume'}</span>
+                      </div>
+                  `;
+                // Click to Resume
+                div.onclick = () => {
+                  app.toggleSidebar(false);
+                  window.player.open(m, m.season, m.episode);
+                };
+                histContainer.appendChild(div);
+              });
+            }
+          });
+        }
+      },
+
+      openConstellation: async () => {
+        // 1. Determine Seed Movie
+        let seed = app.state.currentMedia;
+
+        // If no movie is selected yet, fetch a random trending one
+        if (!seed) {
+          try {
+            const trending = await api.get('/trending/movie/day');
+            if (trending.results && trending.results.length > 0) {
+              seed = trending.results[0];
+            }
+          } catch (e) { }
+        }
+
+        if (!seed) return alert("Please select a movie first to explore.");
+
+        // 2. Switch View
+        app.go('constellation');
+
+        // 3. Generate Graph
+        // Wait for view transition
+        setTimeout(() => {
+          if (window.constellationUI) {
+            window.constellationUI.generate(seed);
+          }
+        }, 100);
+      },
+
       enableDrag: (el) => {
         let isDown = false; let startX; let scrollLeft;
         el.addEventListener('mousedown', (e) => { isDown = true; el.style.cursor = 'grabbing'; startX = e.pageX - el.offsetLeft; scrollLeft = el.scrollLeft; });
@@ -2371,11 +5353,25 @@
 
     // Attach to window so HTML clicks work
     window.app = app;
+    window.socialUI = socialUI;
+    window.analyticsUI = analyticsUI;
+    window.watchPartyUI = watchPartyUI;
+    window.oracleUI = oracleUI;
+    window.actorUI = actorUI;
 
     // Initialize
     app.init();
-  </script>
+    socialUI.init();
+    analyticsUI.init();
+    oracleUI.init();
+    actorUI.init();
+    // In app.init():
+    constellationUI.init();
+    lensUI.init();
 
+
+    //watchPartyUI.init().catch(err => console.error('Error initializing Watch Party UI:', err));
+  </script>
 </body>
 
 </html>

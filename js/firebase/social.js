@@ -1,272 +1,145 @@
-/**
- * ADVANCED FIREBASE FEATURE: User Profiles & Social Network
- * Manages user profiles, friendships, and social connections
- */
-
 import { db } from "./config.js";
-import {
-  doc,
-  setDoc,
-  getDoc,
-  updateDoc,
-  arrayUnion,
-  arrayRemove,
-  collection,
-  query,
-  where,
-  getDocs,
-  serverTimestamp,
-  increment,
-  writeBatch
+import { 
+  doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, collection, 
+  query, limit, getDocs, writeBatch, serverTimestamp, deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/**
- * Create or Update User Profile
- */
-export const createUserProfile = async (user, profileData) => {
-  if (!user) return { success: false, error: "No user" };
-
-  try {
-    const userRef = doc(db, "users", user.uid);
-    const defaultProfile = {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName || "User",
-      photoURL: user.photoURL || "",
-      bio: "",
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-      friends: [],
-      friendRequests: [],
-      followers: [],
-      following: [],
-      stats: {
-        totalWatched: 0,
-        totalWatchTime: 0,
-        favoriteGenre: "All"
-      },
-      preferences: {
-        isPrivate: false,
-        showActivity: true,
-        allowMessages: true
-      }
-    };
-
-    await setDoc(userRef, { ...defaultProfile, ...profileData }, { merge: true });
-    return { success: true, profile: defaultProfile };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-};
-
-/**
- * Get User Profile
- */
+// --- PROFILE ---
 export const getUserProfile = async (uid) => {
-  try {
-    const userRef = doc(db, "users", uid);
-    const userSnap = await getDoc(userRef);
-
-    if (userSnap.exists()) {
-      return { success: true, profile: userSnap.data() };
-    }
-    return { success: false, error: "User not found" };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
+    try {
+        const snap = await getDoc(doc(db, "users", uid));
+        if (snap.exists()) return { success: true, profile: snap.data() };
+        return { success: false, error: "User not found" };
+    } catch (e) { return { success: false, error: e.message }; }
 };
 
-/**
- * Update User Profile
- */
-export const updateUserProfile = async (uid, updates) => {
-  try {
-    const userRef = doc(db, "users", uid);
-    await updateDoc(userRef, {
-      ...updates,
-      updatedAt: serverTimestamp()
-    });
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
+export const updateUserProfile = async (uid, data) => {
+    try {
+        await setDoc(doc(db, "users", uid), data, { merge: true });
+        return { success: true };
+    } catch (e) { return { success: false, error: e.message }; }
 };
 
-/**
- * Send Friend Request
- */
+// --- SEARCH ---
+export const searchUsers = async (term) => {
+    if (!term || term.length < 2) return { success: false };
+    try {
+        const q = query(collection(db, "users"), limit(50));
+        const snap = await getDocs(q);
+        const users = [];
+        const lowerTerm = term.toLowerCase();
+
+        snap.forEach(doc => {
+            const data = doc.data();
+            const name = (data.displayName || "").toLowerCase();
+            const email = (data.email || "").toLowerCase();
+            if (name.includes(lowerTerm) || email.includes(lowerTerm)) {
+                users.push({
+                    uid: doc.id,
+                    displayName: data.displayName,
+                    photoURL: data.photoURL,
+                    email: data.email,
+                    isPrivate: data.preferences?.isPrivate || false
+                });
+            }
+        });
+        return { success: true, users };
+    } catch (e) { return { success: false, error: e.message }; }
+};
+
+// --- REQUESTS (SUBCOLLECTION FIX) ---
+
 export const sendFriendRequest = async (fromUid, toUid) => {
-  try {
-    const recipientRef = doc(db, "users", toUid);
+    try {
+        // 1. Get My Info
+        const mySnap = await getDoc(doc(db, "users", fromUid));
+        const me = mySnap.data();
 
-    // Add to recipient's friend requests
-    await updateDoc(recipientRef, {
-      friendRequests: arrayUnion({
-        from: fromUid,
-        timestamp: serverTimestamp()
-      })
-    });
-
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
+        // 2. Write to Subcollection: /users/{toUid}/friendRequests/{fromUid}
+        // This matches the "allow create" rule we just set
+        const requestRef = doc(db, "users", toUid, "friendRequests", fromUid);
+        
+        await setDoc(requestRef, {
+            fromUid: fromUid,
+            fromName: me.displayName || "Unknown",
+            fromPhoto: me.photoURL || "",
+            timestamp: new Date().toISOString()
+        });
+        
+        return { success: true };
+    } catch (e) {
+        console.error("Send Request Error:", e);
+        return { success: false, error: e.message };
+    }
 };
 
-/**
- * Accept Friend Request
- */
-export const acceptFriendRequest = async (uid, fromUid) => {
-  try {
-    const batch = writeBatch(db);
-
-    // Add friend to current user
-    const userRef = doc(db, "users", uid);
-    batch.update(userRef, {
-      friends: arrayUnion(fromUid),
-      friendRequests: arrayRemove({
-        from: fromUid
-      })
-    });
-
-    // Add current user to friend's friends
-    const friendRef = doc(db, "users", fromUid);
-    batch.update(friendRef, {
-      friends: arrayUnion(uid)
-    });
-
-    await batch.commit();
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
+// Get Requests from Subcollection
+export const getFriendRequestsList = async (uid) => {
+    try {
+        const q = query(collection(db, "users", uid, "friendRequests"));
+        const snap = await getDocs(q);
+        const requests = [];
+        snap.forEach(doc => requests.push(doc.data()));
+        return { success: true, requests };
+    } catch (e) { return { success: false, error: e.message }; }
 };
 
-/**
- * Reject Friend Request
- */
+export const acceptFriendRequest = async (myUid, friendUid) => {
+    try {
+        const batch = writeBatch(db);
+        
+        const myRef = doc(db, "users", myUid);
+        const friendRef = doc(db, "users", friendUid);
+
+        // 1. Update MY arrays (Add Friend + Follow them)
+        batch.update(myRef, { 
+            friends: arrayUnion(friendUid),
+            following: arrayUnion(friendUid),
+            followers: arrayUnion(friendUid) // They follow me too
+        });
+
+        // 2. Update THEIR arrays (Add Me + Follow me)
+        batch.update(friendRef, { 
+            friends: arrayUnion(myUid),
+            following: arrayUnion(myUid),
+            followers: arrayUnion(myUid) // I follow them too
+        });
+
+        // 3. Delete the Request from Subcollection
+        const reqRef = doc(db, "users", myUid, "friendRequests", friendUid);
+        batch.delete(reqRef);
+
+        await batch.commit();
+        console.log("Friend request accepted & mutual follow established.");
+        return { success: true };
+    } catch (e) {
+        console.error("Accept Error:", e);
+        return { success: false, error: e.message };
+    }
+};
+
 export const rejectFriendRequest = async (uid, fromUid) => {
-  try {
-    const userRef = doc(db, "users", uid);
-    await updateDoc(userRef, {
-      friendRequests: arrayRemove({
-        from: fromUid
-      })
-    });
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
+    try {
+        await deleteDoc(doc(db, "users", uid, "friendRequests", fromUid));
+        return { success: true };
+    } catch (e) { return { success: false, error: e.message }; }
 };
 
-/**
- * Remove Friend
- */
 export const removeFriend = async (uid, friendUid) => {
-  try {
     const batch = writeBatch(db);
-
-    const userRef = doc(db, "users", uid);
-    batch.update(userRef, {
-      friends: arrayRemove(friendUid)
-    });
-
-    const friendRef = doc(db, "users", friendUid);
-    batch.update(friendRef, {
-      friends: arrayRemove(uid)
-    });
-
+    batch.update(doc(db, "users", uid), { friends: arrayRemove(friendUid) });
+    batch.update(doc(db, "users", friendUid), { friends: arrayRemove(uid) });
     await batch.commit();
     return { success: true };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
 };
 
-/**
- * Search Users by Name or Email
- */
-export const searchUsers = async (searchTerm) => {
-  try {
-    const usersRef = collection(db, "users");
-    // Note: For production, consider using Algolia or similar for better search
-    const q = query(usersRef, where("displayName", ">=", searchTerm), where("displayName", "<=", searchTerm + "\uf8ff"));
-    const querySnapshot = await getDocs(q);
-
-    const results = [];
-    querySnapshot.forEach((doc) => {
-      results.push({ uid: doc.id, ...doc.data() });
-    });
-
-    return { success: true, users: results };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-};
-
-/**
- * Get User's Friends List
- */
 export const getFriendsList = async (uid) => {
-  try {
-    const userRef = doc(db, "users", uid);
-    const userSnap = await getDoc(userRef);
-
-    if (!userSnap.exists()) {
-      return { success: false, error: "User not found" };
-    }
-
-    const friendIds = userSnap.data().friends || [];
+    const p = await getUserProfile(uid);
+    if(!p.success || !p.profile.friends) return { success: true, friends: [] };
     const friends = [];
-
-    for (const friendId of friendIds) {
-      const friendRef = doc(db, "users", friendId);
-      const friendSnap = await getDoc(friendRef);
-      if (friendSnap.exists()) {
-        friends.push({ uid: friendId, ...friendSnap.data() });
-      }
+    for (const fid of p.profile.friends) {
+        const f = await getUserProfile(fid);
+        if(f.success) friends.push(f.profile);
     }
-
     return { success: true, friends };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-};
-
-/**
- * Follow User (without mutual friendship)
- */
-export const followUser = async (uid, targetUid) => {
-  try {
-    const userRef = doc(db, "users", uid);
-    const targetRef = doc(db, "users", targetUid);
-
-    const batch = writeBatch(db);
-    batch.update(userRef, { following: arrayUnion(targetUid) });
-    batch.update(targetRef, { followers: arrayUnion(uid) });
-
-    await batch.commit();
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-};
-
-/**
- * Unfollow User
- */
-export const unfollowUser = async (uid, targetUid) => {
-  try {
-    const userRef = doc(db, "users", uid);
-    const targetRef = doc(db, "users", targetUid);
-
-    const batch = writeBatch(db);
-    batch.update(userRef, { following: arrayRemove(targetUid) });
-    batch.update(targetRef, { followers: arrayRemove(uid) });
-
-    await batch.commit();
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
 };

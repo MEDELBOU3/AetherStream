@@ -1,4 +1,5 @@
 /**
+ * js/components/SocialDashboard.js
  * EXAMPLE: Social Dashboard Component
  * Shows how to use the advanced Firebase features
  */

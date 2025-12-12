@@ -1,8 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, GoogleAuthProvider} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-// 1. Import Firestore
+import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+// REPLACE WITH YOUR CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyAHsUCcYEkIaqRt1augubJIPJeVUR0VCc8",
   authDomain: "aether-f068c.firebaseapp.com",
@@ -16,5 +16,4 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
-// 2. Export Database
 export const db = getFirestore(app);

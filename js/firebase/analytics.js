@@ -1,294 +1,131 @@
 /**
- * ADVANCED FIREBASE FEATURE: Activity Feed & Watch History
- * Tracks user activity and provides personalized recommendations
+ * js/firebase/analytics.js
+ * Backend logic for calculating stats and recommendations
  */
 
 import { db } from "./config.js";
-import {
-  doc,
-  collection,
-  addDoc,
-  query,
-  where,
-  getDocs,
-  orderBy,
-  limit,
-  serverTimestamp,
-  updateDoc,
-  increment,
-  writeBatch
+import { 
+  doc, getDoc, collection, query, where, getDocs, orderBy, limit, addDoc, serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /**
- * Log Watch Activity
+ * LOG ACTIVITY
  */
-export const logWatchActivity = async (uid, movieData, watchDuration) => {
+export const logActivity = async (uid, media, type, extraData = {}) => {
   try {
-    const watchHistoryRef = collection(db, "watchHistory");
-
-    const activity = {
-      uid,
-      movieData,
-      watchDuration,
-      watchedAt: serverTimestamp(),
-      rating: null,
-      review: null,
-      completed: watchDuration > movieData.duration * 0.8
-    };
-
-    const docRef = await addDoc(watchHistoryRef, activity);
-
-    // Update user stats
-    await updateUserStats(uid, movieData.genre, watchDuration);
-
-    return { success: true, activityId: docRef.id };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-};
-
-/**
- * Update User Statistics
- */
-export const updateUserStats = async (uid, genre, watchDuration) => {
-  try {
-    const userRef = doc(db, "users", uid);
-    
-    await updateDoc(userRef, {
-      "stats.totalWatched": increment(1),
-      "stats.totalWatchTime": increment(Math.floor(watchDuration / 60)), // Convert to minutes
-      "stats.favoriteGenre": genre
+    await addDoc(collection(db, "activityFeed"), {
+      userId: uid,
+      userPhoto: extraData.userPhoto || null,
+      userName: extraData.userName || "User",
+      type: type,
+      movieTitle: media.title || media.name,
+      poster_path: media.poster_path,
+      rating: extraData.rating || null,
+      timestamp: serverTimestamp()
     });
-
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
+  } catch (e) { console.error("Activity Log Error:", e); }
 };
 
 /**
- * Rate Movie
- */
-export const rateMovie = async (uid, movieId, rating, review = "") => {
-  try {
-    const ratingsRef = collection(db, "ratings");
-
-    await addDoc(ratingsRef, {
-      uid,
-      movieId,
-      rating, // 1-5 stars
-      review,
-      ratedAt: serverTimestamp()
-    });
-
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-};
-
-/**
- * Get User Watch History
- */
-export const getUserWatchHistory = async (uid, limitCount = 20) => {
-  try {
-    const watchHistoryRef = collection(db, "watchHistory");
-    const q = query(
-      watchHistoryRef,
-      where("uid", "==", uid),
-      orderBy("watchedAt", "desc"),
-      limit(limitCount)
-    );
-
-    const querySnapshot = await getDocs(q);
-    const history = [];
-
-    querySnapshot.forEach((doc) => {
-      history.push({ id: doc.id, ...doc.data() });
-    });
-
-    return { success: true, history };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-};
-
-/**
- * Get Activity Feed (Friends' Activities)
- */
-export const getActivityFeed = async (uid) => {
-  try {
-    // Get user's friends
-    const userRef = doc(db, "users", uid);
-    const userSnap = await getDoc(userRef);
-
-    if (!userSnap.exists()) {
-      return { success: false, error: "User not found" };
-    }
-
-    const friends = userSnap.data().friends || [];
-
-    // Get watch history of friends
-    const watchHistoryRef = collection(db, "watchHistory");
-    const feedActivities = [];
-
-    for (const friendId of friends) {
-      const q = query(
-        watchHistoryRef,
-        where("uid", "==", friendId),
-        orderBy("watchedAt", "desc"),
-        limit(5)
-      );
-
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) => {
-        feedActivities.push({
-          id: doc.id,
-          type: "watched",
-          friendId,
-          ...doc.data()
-        });
-      });
-    }
-
-    // Sort by timestamp
-    feedActivities.sort((a, b) => b.watchedAt - a.watchedAt);
-
-    return { success: true, feed: feedActivities.slice(0, 30) };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-};
-
-/**
- * Get Smart Recommendations Based on Watch History
- */
-export const getSmartRecommendations = async (uid) => {
-  try {
-    // Get user's watch history
-    const watchHistoryRef = collection(db, "watchHistory");
-    const q = query(
-      watchHistoryRef,
-      where("uid", "==", uid),
-      orderBy("watchedAt", "desc"),
-      limit(50)
-    );
-
-    const querySnapshot = await getDocs(q);
-    const watchedMovies = [];
-    const genreFrequency = {};
-
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      watchedMovies.push(data.movieData);
-
-      // Count genre frequency
-      const genre = data.movieData.genre;
-      genreFrequency[genre] = (genreFrequency[genre] || 0) + 1;
-    });
-
-    // Find top genres
-    const topGenres = Object.entries(genreFrequency)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3)
-      .map(([genre]) => genre);
-
-    return {
-      success: true,
-      recommendations: {
-        topGenres,
-        watchedCount: watchedMovies.length,
-        suggestGenres: topGenres,
-        basedOn: watchedMovies.slice(0, 5)
-      }
-    };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-};
-
-/**
- * Get Trending Movies (Most Watched)
- */
-export const getTrendingMovies = async (limitCount = 10) => {
-  try {
-    const watchHistoryRef = collection(db, "watchHistory");
-    const q = query(
-      watchHistoryRef,
-      orderBy("watchedAt", "desc"),
-      limit(100)
-    );
-
-    const querySnapshot = await getDocs(q);
-    const movieCounts = {};
-    const movieData = {};
-
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      const movieId = data.movieData.id;
-
-      movieCounts[movieId] = (movieCounts[movieId] || 0) + 1;
-      if (!movieData[movieId]) {
-        movieData[movieId] = data.movieData;
-      }
-    });
-
-    const trending = Object.entries(movieCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, limitCount)
-      .map(([movieId, count]) => ({
-        ...movieData[movieId],
-        viewCount: count
-      }));
-
-    return { success: true, trending };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-};
-
-/**
- * Get Statistics Dashboard
+ * GET STATS DASHBOARD
  */
 export const getStatisticsDashboard = async (uid) => {
-  try {
-    const userRef = doc(db, "users", uid);
-    const userSnap = await getDoc(userRef);
+    try {
+        const userSnap = await getDoc(doc(db, "users", uid));
+        const userData = userSnap.exists() ? userSnap.data() : {};
+        const history = userData.history || [];
+        const favorites = userData.favorites || [];
 
-    if (!userSnap.exists()) {
-      return { success: false, error: "User not found" };
+        // Calculate Avg Rating
+        const q = query(collection(db, "ratings"), where("uid", "==", uid));
+        const ratingsSnap = await getDocs(q);
+        
+        let totalStars = 0;
+        let ratedCount = 0;
+        const distribution = { 1:0, 2:0, 3:0, 4:0, 5:0 };
+
+        ratingsSnap.forEach(doc => {
+            const r = doc.data().rating;
+            if(r) {
+                totalStars += r;
+                ratedCount++;
+                if(distribution[r] !== undefined) distribution[r]++;
+            }
+        });
+
+        const avgRating = ratedCount > 0 ? (totalStars / ratedCount) : 0;
+
+        // Calculate Watch Time
+        let totalMinutes = 0;
+        history.forEach(h => {
+             totalMinutes += (h.media_type === 'movie' ? 120 : 45);
+        });
+
+        return {
+            success: true,
+            stats: {
+                totalWatched: history.length,
+                totalFavorites: favorites.length,
+                totalWatchTime: totalMinutes,
+                averageRating: avgRating,
+                ratingDistribution: distribution,
+                recentWatches: history.slice(-5).reverse()
+            }
+        };
+
+    } catch (error) {
+        return { success: false, error: error.message };
     }
+};
 
-    const userData = userSnap.data();
+/**
+ * GET ACTIVITY FEED
+ */
+export const getActivityFeed = async (uid) => {
+    const q = query(collection(db, "activityFeed"), orderBy("timestamp", "desc"), limit(20));
+    const snap = await getDocs(q);
+    const feed = [];
+    snap.forEach(d => feed.push(d.data()));
+    return { success: true, feed };
+};
 
-    // Get recent watch history
-    const watchHistoryRef = collection(db, "watchHistory");
-    const q = query(
-      watchHistoryRef,
-      where("uid", "==", uid),
-      orderBy("watchedAt", "desc"),
-      limit(10)
-    );
+/**
+ * GET TRENDING (For Analytics Tab)
+ */
+export const getTrendingMovies = async (limitCount=10) => {
+     const q = query(collection(db, "global_stats"), orderBy("view_count", "desc"), limit(limitCount));
+     const res = [];
+     const snap = await getDocs(q);
+     snap.forEach(d => res.push(d.data()));
+     return { success: true, trending: res };
+};
 
-    const querySnapshot = await getDocs(q);
-    const recentWatches = [];
+/**
+ * GET SMART RECOMMENDATIONS (The Seed)
+ */
+export const getSmartRecommendations = async (uid) => {
+    try {
+        const userRef = doc(db, "users", uid);
+        const snapshot = await getDoc(userRef);
+        
+        if (snapshot.exists()) {
+            const data = snapshot.data();
+            const history = data.history || [];
+            
+            if (history.length > 0) {
+                // Return the last watched item as the seed
+                const lastWatched = history[history.length - 1];
+                return { 
+                    success: true, 
+                    seed: lastWatched, 
+                    isPersonalized: true 
+                };
+            }
+        }
+        return { success: true, seed: null, isPersonalized: false };
 
-    querySnapshot.forEach((doc) => {
-      recentWatches.push(doc.data());
-    });
-
-    return {
-      success: true,
-      stats: {
-        totalWatched: userData.stats.totalWatched,
-        totalWatchTime: userData.stats.totalWatchTime,
-        favoriteGenre: userData.stats.favoriteGenre,
-        friendsCount: userData.friends.length,
-        followersCount: userData.followers.length,
-        recentWatches
-      }
-    };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
+    } catch (error) {
+        console.error("Recs Error:", error);
+        return { success: false, error: error.message };
+    }
 };
