@@ -8,7 +8,7 @@ A desktop application built with Electron.
 
 ![Image 3](assets/Ui3.png)
 
-![Image 3](assets/ui4.png)
+![Image 4](assets/ui4.png)
 
 
 
